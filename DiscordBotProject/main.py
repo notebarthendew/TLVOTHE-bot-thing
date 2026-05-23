@@ -20,7 +20,9 @@ from cogs.commands import setup_commands as setup_slash_commands
 from cogs.prefix_commands import setup_commands as setup_prefix_commands
 from cogs.game_commands import setup_commands as setup_game_commands
 
-setup_commands(bot)
+setup_slash_commands(bot)
+setup_prefix_commands(bot)
+setup_game_commands(bot)
 
 @bot.event
 async def on_ready():
