@@ -27,5 +27,5 @@ class MessageEvents(commands.Cog):
 
         await bot.process_commands(message)
 
-async def setup(bot):
-    await bot.add_cog(MessageEvents(bot))
+def setup_commands(bot):
+    bot.add_cog(MessageEvents(bot))
