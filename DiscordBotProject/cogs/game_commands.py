@@ -66,7 +66,7 @@ def setup_commands(bot):
         )
 
     @bot.tree.command(name="checkplayers")
-        async def checkplayers(interaction: discord.Interaction):
+    async def checkplayers(interaction: discord.Interaction):
 
         await interaction.response.send_message(
             str(players),
