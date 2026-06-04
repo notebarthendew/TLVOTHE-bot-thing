@@ -2,6 +2,7 @@ from discord import app_commands
 import discord
 
 from game.player import players, create_player
+from game.movement import move_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 
@@ -52,6 +53,7 @@ def setup_commands(bot):
             return
 
         # Create player
+        print("ADD COMMAND REACHED")
         create_player(user_id)
 
         # Give game role
@@ -122,5 +124,33 @@ def setup_commands(bot):
 
         await interaction.response.send_message(
             f"*You moved to {result}.*",
+            ephemeral=True
+        )
+
+    # ---- DEBBUGING COMMANdS ----
+    @bot.tree.command(name="myroom")
+    async def myroom(interaction: discord.Interaction):
+
+        user_id = str(interaction.user.id)
+
+        if user_id not in players:
+
+            await interaction.response.send_message(
+                "Not in game.",
+                ephemeral=True
+            )
+
+            return
+    
+        await interaction.response.send_message(
+            players[user_id]["room"],
+            ephemeral=True
+    )
+
+    @bot.tree.command(name="checkplayers")
+    async def checkplayers(interaction: discord.Interaction):
+
+        await interaction.response.send_message(
+            f"```py\n{players}\n```",
             ephemeral=True
         )
