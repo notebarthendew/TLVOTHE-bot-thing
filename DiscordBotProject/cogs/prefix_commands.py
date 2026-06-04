@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+from utils.constants import ADMIN_ROLE_ID
 
 def setup_commands(bot):
     
@@ -36,4 +37,20 @@ def setup_commands(bot):
                         "* '?revolver' Send a Revolver (<:Revolver:1505709394057494659>) emoji"
                        )
         print("Sent 'commands' prefix command")
-# \n
+
+    @bot.command(name="say")
+        async def say(ctx, channel_id: int, *, message: str):
+        if not any(role.id == ADMIN_ROLE_ID for role in ctx.author.roles):
+            return
+
+            try:
+                channel = bot.get_channel(channel_id) or await bot.fetch_channel(channel_id)
+
+            if message.startswith('"') and message.endswith('"'):
+                message = message[1:-1]
+
+                await channel.send(message)
+                await ctx.send("✅ Message sent successfully.")
+
+            except Exception as e:
+            await ctx.send(f"❌ Failed to send message: {e}")
