@@ -2,6 +2,7 @@ from discord import app_commands
 import discord
 
 from game.player import players, create_player
+from game.movement import move_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 
