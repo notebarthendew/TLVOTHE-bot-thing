@@ -46,11 +46,11 @@ def setup_commands(bot):
             try:
                 channel = bot.get_channel(channel_id) or await bot.fetch_channel(channel_id)
 
-            if message.startswith('"') and message.endswith('"'):
-                message = message[1:-1]
+                if message.startswith('"') and message.endswith('"'):
+                    message = message[1:-1]
 
-                await channel.send(message)
-                await ctx.send("Message sent successfully.")
+                    await channel.send(message)
+                    await ctx.send("Message sent successfully.")
 
             except Exception as e:
             await ctx.send(f"Failed to send message: {e}")
