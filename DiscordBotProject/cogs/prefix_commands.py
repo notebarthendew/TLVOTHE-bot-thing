@@ -39,7 +39,7 @@ def setup_commands(bot):
         print("Sent 'commands' prefix command")
 
     @bot.command(name="say")
-        async def say(ctx, channel_id: int, *, message: str):
+    async def say(ctx, channel_id: int, *, message: str):
         if not any(role.id == ADMIN_ROLE_ID for role in ctx.author.roles):
             return
 
