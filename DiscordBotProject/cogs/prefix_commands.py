@@ -53,4 +53,4 @@ def setup_commands(bot):
                     await ctx.send("Message sent successfully.")
 
             except Exception as e:
-            await ctx.send(f"Failed to send message: {e}")
+                await ctx.send(f"Failed to send message: {e}")
