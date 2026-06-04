@@ -52,6 +52,7 @@ def setup_commands(bot):
             return
 
         # Create player
+        print("ADD COMMAND REACHED")
         create_player(user_id)
 
         # Give game role
