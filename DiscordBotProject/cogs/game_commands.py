@@ -125,3 +125,23 @@ def setup_commands(bot):
             f"*You moved to {result}.*",
             ephemeral=True
         )
+
+    # ---- DEBBUGING COMMANdS ----
+    @bot.tree.command(name="myroom")
+    async def myroom(interaction: discord.Interaction):
+
+        user_id = str(interaction.user.id)
+
+        if user_id not in players:
+
+            await interaction.response.send_message(
+                "Not in game.",
+                ephemeral=True
+            )
+
+            return
+    
+        await interaction.response.send_message(
+            players[user_id]["room"],
+            ephemeral=True
+    )
