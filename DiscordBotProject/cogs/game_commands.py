@@ -68,14 +68,6 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    @bot.tree.command(name="checkplayers")
-    async def checkplayers(interaction: discord.Interaction):
-
-        await interaction.response.send_message(
-            str(players),
-            ephemeral=True
-        )
-
     # --- MOVEMENT STUFF ---
 
     @bot.tree.command(
