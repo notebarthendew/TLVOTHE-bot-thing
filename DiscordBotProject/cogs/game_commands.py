@@ -145,3 +145,11 @@ def setup_commands(bot):
             players[user_id]["room"],
             ephemeral=True
     )
+
+    @bot.tree.command(name="checkplayers")
+    async def checkplayers(interaction: discord.Interaction):
+
+        await interaction.response.send_message(
+            f"```py\n{players}\n```",
+            ephemeral=True
+        )
