@@ -11,3 +11,5 @@ def create_player(user_id):
         "inventory": [],
         "status": [],
     }
+    print(f"Created player: {user_id}")
+    print(players)
