@@ -142,6 +142,18 @@ def setup_commands(bot):
     @bot.tree.command(name="checkplayers")
     async def checkplayers(interaction: discord.Interaction):
 
+        has_admin_role = any(
+                role.id == ADMIN_ROLE_ID
+                for role in interaction.user.roles
+            )
+
+            if not has_admin_role:
+
+                await interaction.response.send_message(
+                    "You can't do that.",
+                    ephemeral=True
+                )
+        
         await interaction.response.send_message(
             f"```py\n{players}\n```",
             ephemeral=True
