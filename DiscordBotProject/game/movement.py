@@ -8,9 +8,12 @@ def move_player(player_data, direction):
 
     if direction not in ROOMS[current_room]:
         return None
-
+    
     new_room = ROOMS[current_room][direction]
-
+    
+    if next_room is None:
+        return None
+    
     player_data["room"] = new_room
 
     return new_room
