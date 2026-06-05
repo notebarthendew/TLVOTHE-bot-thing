@@ -129,16 +129,6 @@ def setup_commands(bot):
     async def look(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
-
-        people_in_room = []
-
-        for player_id, player_data in players.items():
-
-            if player_data["room"] == current_room:
-
-                people_in_room.append(
-                    player_data["nickname"]
-                )
         
         if user_id not in players:
 
@@ -151,6 +141,16 @@ def setup_commands(bot):
 
         current_room = players[user_id]["room"]
 
+        people_in_room = []
+
+        for player_id, player_data in players.items():
+
+            if player_data["room"] == current_room:
+
+                people_in_room.append(
+                    player_data["nickname"]
+                )
+        
         await interaction.response.send_message(
             f"You see yourself standing in the {players[user_id]['room']} cabin.\n"
             f"People here: {', '.join(people_in_room)}",
