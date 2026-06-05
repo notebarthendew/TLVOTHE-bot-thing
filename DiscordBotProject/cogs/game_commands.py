@@ -22,7 +22,7 @@ def setup_commands(bot):
 
     async def add(
         interaction: discord.Interaction,
-        member: discord.Member
+        member: discord.Member,
         nickname: str
     ):
 
@@ -55,7 +55,7 @@ def setup_commands(bot):
 
         # Create player
         print("ADD COMMAND REACHED")
-        create_player(user_id)
+        create_player(user_id, nickname)
 
         # Give game role
         game_role = interaction.guild.get_role(
@@ -126,20 +126,19 @@ def setup_commands(bot):
     description="👀"
     )
     
-    async def look(interaction: discord:Interaction):
+    async def look(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
-        current_room = players[user_id]["room"]
 
         people_in_room = []
 
-            for player_id, player_data in players.items():
+        for player_id, player_data in players.items():
 
-                if player_data["room"] == current_room:
+            if player_data["room"] == current_room:
 
-                    people_in_room.append(
-                        player_data["character_name"]
-                    )
+                people_in_room.append(
+                    player_data["nickname"]
+                )
         
         if user_id not in players:
 
@@ -150,11 +149,13 @@ def setup_commands(bot):
 
             return
 
+        current_room = players[user_id]["room"]
+
         await interaction.response.send_message(
-            f"You see yourself standing in the {players[user_id]["room"]} cabin.\n"
+            f"You see yourself standing in the {players[user_id]['room']} cabin.\n"
             f"People here: {', '.join(people_in_room)}",
             ephemeral=True
-
+        )
         
     
     # ---- DEBBUGING COMMANdS ----
@@ -185,12 +186,14 @@ def setup_commands(bot):
                 for role in interaction.user.roles
             )
 
-            if not has_admin_role:
+        if not has_admin_role:
 
-                await interaction.response.send_message(
-                    "You can't do that, silly.",
-                    ephemeral=True
-                )
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
         
         await interaction.response.send_message(
             f"```py\n{players}\n```",
