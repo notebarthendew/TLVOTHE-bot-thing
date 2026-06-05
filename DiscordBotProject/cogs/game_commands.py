@@ -35,7 +35,7 @@ def setup_commands(bot):
         if not has_admin_role:
 
             await interaction.response.send_message(
-                "You can't do that.",
+                "You can't do that, silly.",
                 ephemeral=True
             )
 
@@ -69,7 +69,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    # --- MOVEMENT STUFF ---
+    # --- PLAYER ACTIONS ---
 
     @bot.tree.command(
     name="move",
@@ -109,7 +109,7 @@ def setup_commands(bot):
         if result is None:
 
             await interaction.response.send_message(
-                "*You are unable to move that way... crud...*.",
+                "*You confidently walk into a wall*.",
                 ephemeral=True
             )
 
@@ -120,6 +120,28 @@ def setup_commands(bot):
             ephemeral=True
         )
 
+    
+    @bot.tree.command(
+    name="look",
+    description="👀"
+    )
+    
+    async def look(interaction: discord:Interaction):
+
+        user_id = str(interaction.user.id)
+
+        if user_id not in players:
+
+            await interaction.response.send_message(
+                "*You look around to see that you are not in a train*. **(Not in game)**",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            f"You see yourself standing in the {players[user_id]["room"]} cabin"
+    
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):
@@ -129,7 +151,7 @@ def setup_commands(bot):
         if user_id not in players:
 
             await interaction.response.send_message(
-                "Not in game.",
+                "*You don't have a room*. **(Not in game)**",
                 ephemeral=True
             )
 
@@ -151,7 +173,7 @@ def setup_commands(bot):
             if not has_admin_role:
 
                 await interaction.response.send_message(
-                    "You can't do that.",
+                    "You can't do that, silly.",
                     ephemeral=True
                 )
         
