@@ -11,7 +11,7 @@ def move_player(player_data, direction):
     
     new_room = ROOMS[current_room][direction]
     
-    if next_room is None:
+    if new_room is None:
         return None
     
     player_data["room"] = new_room
