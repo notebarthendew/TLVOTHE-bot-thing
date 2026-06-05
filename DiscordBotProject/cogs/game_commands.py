@@ -129,7 +129,18 @@ def setup_commands(bot):
     async def look(interaction: discord:Interaction):
 
         user_id = str(interaction.user.id)
+        current_room = players[user_id]["room"]
 
+        people_in_room = []
+
+            for player_id, player_data in players.items():
+
+                if player_data["room"] == current_room:
+
+                    people_in_room.append(
+                        player_data["character_name"]
+                    )
+        
         if user_id not in players:
 
             await interaction.response.send_message(
@@ -140,7 +151,11 @@ def setup_commands(bot):
             return
 
         await interaction.response.send_message(
-            f"You see yourself standing in the {players[user_id]["room"]} cabin"
+            f"You see yourself standing in the {players[user_id]["room"]} cabin.\n"
+            f"People here: {', '.join(people_in_room)}",
+            ephemeral=True
+
+        
     
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
