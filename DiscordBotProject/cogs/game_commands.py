@@ -23,6 +23,7 @@ def setup_commands(bot):
     async def add(
         interaction: discord.Interaction,
         member: discord.Member
+        nickname: str
     ):
 
         # Check admin role
