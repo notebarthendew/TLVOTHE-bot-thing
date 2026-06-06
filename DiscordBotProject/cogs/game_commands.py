@@ -5,6 +5,7 @@ from game.player import players, create_player
 from game.movement import move_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
+from game.map import ROOMS
 
 
 def setup_commands(bot):
