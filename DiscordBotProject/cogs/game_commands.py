@@ -145,15 +145,26 @@ def setup_commands(bot):
 
         for player_id, player_data in players.items():
 
+            if player_id == user_id:
+                continue
+            
             if player_data["room"] == current_room:
 
                 people_in_room.append(
                     player_data["nickname"]
                 )
+
+        if not people_in_room:
+            people_text = "- Nobody"
+        else:
+            people_text = "\n".join(
+                f"- {person}"
+                for person in people_in_room
+            )
         
         await interaction.response.send_message(
-            f"You see yourself standing in the {players[user_id]['room']} cabin.\n"
-            f"People here: {', '.join(people_in_room)}",
+            f"You see yourself standing in the {players[user_id]['room']} cabin.\n\n"
+            f"People here:\n{people_text}",
             ephemeral=True
         )
         
