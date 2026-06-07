@@ -1,3 +1,5 @@
+import random
+
 from discord import app_commands
 import discord
 
@@ -182,9 +184,21 @@ def setup_commands(bot):
                f"- {exit}"
                for exit in exits
         )
+
+        look_messages = [
+            f"You see yourself standing in the {current_room} cabin.",
+            f"You take a look around cabin {current_room}.",
+            f"The train rattles softly as you stand in cabin {current_room}.",
+            f"You find yourself in cabin {current_room}.",
+            f"You glance around cabin {current_room}.",
+            f"The dimly lit cabin {current_room} stretches around you.",
+            f"You survey your surroundings in cabin {current_room}."
+        ]
+
+        look_message = random.choice(look_messages)
         
         await interaction.response.send_message(
-            f"You see yourself standing in the {players[user_id]['room']} cabin.\n\n"
+            f"{look_message}\n\n"
             f"People here:\n{people_text}\n\n"
             f"Exits:\n{exits_text}",
             ephemeral=True
