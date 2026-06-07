@@ -141,7 +141,11 @@ def setup_commands(bot):
             return
 
         current_room = players[user_id]["room"]
+        room_data = ROOMS[current_room]
 
+        front_room = room_data["front"]
+        back_room = room_data["back"]
+        
         people_in_room = []
 
         for player_id, player_data in players.items():
@@ -162,10 +166,27 @@ def setup_commands(bot):
                 f"- {person}"
                 for person in people_in_room
             )
+
+        exits = []
+
+        if room_data["front"] is not None:
+            exits.append(f"{front_room} (Front)")
+
+        if room_data["back"] is not None:
+            exits.append(f"{back_room} (Back)")
+
+        if not exits:
+            exits_text = "- None"
+        else:
+            exits_text = "\n".join(
+               f"- {exit}"
+               for exit in exits
+        )
         
         await interaction.response.send_message(
             f"You see yourself standing in the {players[user_id]['room']} cabin.\n\n"
-            f"People here:\n{people_text}",
+            f"People here:\n{people_text}\n\n"
+            f"Exits:\n{exits_text}",
             ephemeral=True
         )
         
