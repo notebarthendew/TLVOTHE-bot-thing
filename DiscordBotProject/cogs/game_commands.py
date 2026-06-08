@@ -119,7 +119,9 @@ def setup_commands(bot):
 
             return
 
-        old_channel = current_room
+        old_channel = interaction.guild.get_channel(
+            ROOMS[current_room]["command_channel_id"]
+        )
         
         result = move_player(
             players[user_id],
