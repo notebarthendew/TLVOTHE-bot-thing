@@ -133,7 +133,7 @@ def setup_commands(bot):
             return
 
         await interaction.response.send_message(
-            f"*{nickname} moved to the {direction} of the train.*",
+            f"*{nickname} moved to the {direction.value} of the train.*",
         )
 
     
