@@ -124,10 +124,6 @@ def setup_commands(bot):
             direction.value
         )
 
-        new_channel = interaction.guild.get_channel(
-            ROOMS[result]["channel_id"]
-        )
-
         
         if result is None:
 
@@ -137,6 +133,10 @@ def setup_commands(bot):
 
             return
 
+        new_channel = interaction.guild.get_channel(
+            ROOMS[result]["channel_id"]
+        )
+        
         await interaction.response.send_message(
             f"*{nickname} moved to the {direction.value} of the train.*",
         )
