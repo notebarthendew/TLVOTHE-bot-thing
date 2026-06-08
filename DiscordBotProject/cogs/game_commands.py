@@ -104,6 +104,19 @@ def setup_commands(bot):
 
             return
 
+        current_room = players[user_id]["room"]
+
+        room_channel_id = ROOMS[current_room]["channel_id"]
+
+            if interaction.channel.id != room_channel_id:
+
+                await interaction.response.send_message(
+                f"You can only move from the room you're currently in. (Use the command in the {current_room})",
+                ephemeral=True
+            )
+
+    return
+        
         result = move_player(
             players[user_id],
             direction.value
