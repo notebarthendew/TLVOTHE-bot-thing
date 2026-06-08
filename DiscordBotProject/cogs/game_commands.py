@@ -95,6 +95,8 @@ def setup_commands(bot):
 
         user_id = str(interaction.user.id)
 
+        nickname = players[user_id]["nickname"]
+        
         if user_id not in players:
 
             await interaction.response.send_message(
@@ -125,15 +127,13 @@ def setup_commands(bot):
         if result is None:
 
             await interaction.response.send_message(
-                "*You confidently walk into a wall*.",
-                ephemeral=True
+                f"*{nickname} confidently walks into a wall*.",
             )
 
             return
 
         await interaction.response.send_message(
-            f"*You moved to {result}.*",
-            ephemeral=True
+            f"*{nickname} moved to the {direction} of the train.*",
         )
 
     
