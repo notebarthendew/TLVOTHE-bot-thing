@@ -124,6 +124,11 @@ def setup_commands(bot):
             direction.value
         )
 
+        new_channel = interaction.guild.get_channel(
+            ROOMS[result]["channel_id"]
+        )
+
+        
         if result is None:
 
             await interaction.response.send_message(
@@ -136,6 +141,15 @@ def setup_commands(bot):
             f"*{nickname} moved to the {direction.value} of the train.*",
         )
 
+        if direction.value == "back":
+            arrival_direction = "front"
+        else:
+            arrival_direction = "back"
+
+        await new_channel.send(
+            f"*{nickname} arrives from the {arrival_direction} of the train.*"
+        )
+    
     
     @bot.tree.command(
     name="look",
