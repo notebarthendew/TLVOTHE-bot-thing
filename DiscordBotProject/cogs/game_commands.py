@@ -111,7 +111,7 @@ def setup_commands(bot):
         if interaction.channel.id != room_channel_id:
 
             await interaction.response.send_message(
-            f"You can only move from the room you're currently in. (Use the command in the {current_room})",
+            f"You can only move from the room you're currently in. (Use the command in the {current_room} channel)",
             ephemeral=True
         )
 
