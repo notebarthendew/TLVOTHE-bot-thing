@@ -140,9 +140,10 @@ def setup_commands(bot):
         new_channel = interaction.guild.get_channel(
             ROOMS[result]["command_channel_id"]
 
-        new_channel_main = interaction.guild.get_channel(
-            ROOMS[result]["channel_id"]
+        )
             
+        new_channel_main = interaction.guild.get_channel(
+            ROOMS[result]["channel_id"]         
         )
         
         await interaction.response.send_message(
