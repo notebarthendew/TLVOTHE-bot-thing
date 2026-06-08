@@ -134,7 +134,7 @@ def setup_commands(bot):
             return
 
         new_channel = interaction.guild.get_channel(
-            ROOMS[result]["channel_id"]
+            ROOMS[result]["command_channel_id"]
         )
         
         await interaction.response.send_message(
