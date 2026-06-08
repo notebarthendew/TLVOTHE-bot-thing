@@ -291,3 +291,15 @@ def setup_commands(bot):
             f"```py\n{players}\n```",
             ephemeral=True
         )
+
+    @bot.tree.command(name="fixme")
+    async def fixme(interaction: discord.Interaction):
+
+            user_id = str(interaction.user.id)
+
+            players[user_id]["room"] = "5"
+
+            await interaction.response.send_message(
+                "Returned to room 5.",
+                ephemeral=True
+            )
