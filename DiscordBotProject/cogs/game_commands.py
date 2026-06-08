@@ -118,6 +118,8 @@ def setup_commands(bot):
         )
 
             return
+
+        old_channel = current_room
         
         result = move_player(
             players[user_id],
@@ -150,6 +152,15 @@ def setup_commands(bot):
             f"*{nickname} arrives from the {arrival_direction} of the train.*"
         )
     
+        await old_channel.set_permissions(
+            interaction.user,
+            view_channel=False
+        )
+
+        await new_channel.set_permissions(
+            interaction.user,
+            view_channel=True
+        )
     
     @bot.tree.command(
     name="look",
