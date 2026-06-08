@@ -139,6 +139,10 @@ def setup_commands(bot):
 
         new_channel = interaction.guild.get_channel(
             ROOMS[result]["command_channel_id"]
+
+        new_channel_main = interaction.guild.get_channel(
+            ROOMS[result]["channel_id"]
+            
         )
         
         await interaction.response.send_message(
@@ -159,7 +163,7 @@ def setup_commands(bot):
             view_channel=False
         )
 
-        await new_channel.set_permissions(
+        await new_channel_main.set_permissions(
             interaction.user,
             view_channel=True
         )
