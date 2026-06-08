@@ -115,7 +115,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    return
+            return
         
         result = move_player(
             players[user_id],
