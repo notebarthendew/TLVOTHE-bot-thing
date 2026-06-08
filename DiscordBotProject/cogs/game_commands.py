@@ -158,7 +158,14 @@ def setup_commands(bot):
         await new_channel.send(
             f"*{nickname} arrives from the {arrival_direction} of the train.*"
         )
-    
+
+        print("Current room:", current_room)
+        print("Result room:", result)
+        print("Forum ID:", ROOMS[result]["channel_id"])
+        print("Thread ID:", ROOMS[result]["command_channel_id"])
+        print("Forum object:", new_channel_main)
+        print("Thread object:", new_channel)
+        
         await old_channel.set_permissions(
             interaction.user,
             view_channel=False
