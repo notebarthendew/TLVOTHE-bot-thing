@@ -94,8 +94,6 @@ def setup_commands(bot):
     ):
 
         user_id = str(interaction.user.id)
-
-        nickname = players[user_id]["nickname"]
         
         if user_id not in players:
 
@@ -106,6 +104,8 @@ def setup_commands(bot):
 
             return
 
+        nickname = players[user_id]["nickname"]
+        
         current_room = players[user_id]["room"]
 
         allowed_channel_id = ROOMS[current_room]["command_channel_id"]
