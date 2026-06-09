@@ -195,6 +195,7 @@ def setup_commands(bot):
             f"You glance around cabin {current_room}.",
             f"The dimly lit cabin {current_room} stretches around you.",
             f"You survey your surroundings in cabin {current_room}."
+            f"Lo, thou standest within Cabin {current_room}, borne ever onward by the great locomotive. Around thee lie the furnishings of the carriage, whilst beyond its walls the thunderous song of wheel and rail proclaimeth the train's relentless advance."
         ]
 
         look_message = random.choice(look_messages)
