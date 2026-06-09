@@ -12,66 +12,6 @@ from game.map import ROOMS
 
 def setup_commands(bot):
 
-    # --- PLAYER STUFF ----
-    
-    @bot.tree.command(
-        name="add",
-        description="Add a player to the game"
-    )
-
-    @app_commands.describe(
-        member="The player to add"
-    )
-
-    async def add(
-        interaction: discord.Interaction,
-        member: discord.Member,
-        nickname: str
-    ):
-
-        # Check admin role
-        has_admin_role = any(
-            role.id == ADMIN_ROLE_ID
-            for role in interaction.user.roles
-        )
-
-        if not has_admin_role:
-
-            await interaction.response.send_message(
-                "You can't do that, silly.",
-                ephemeral=True
-            )
-
-            return
-
-        user_id = str(member.id)
-
-        # Already in game
-        if user_id in players:
-
-            await interaction.response.send_message(
-                f"{member.mention} is already in the game.",
-                ephemeral=True
-            )
-
-            return
-
-        # Create player
-        print("ADD COMMAND REACHED")
-        create_player(user_id, nickname)
-
-        # Give game role
-        game_role = interaction.guild.get_role(
-            GAME_ROLE_ID
-        )
-
-        await member.add_roles(game_role)
-
-        await interaction.response.send_message(
-            f"{member.mention} joined the game.",
-            ephemeral=True
-        )
-
     # --- PLAYER ACTIONS ---
 
     @bot.tree.command(
@@ -121,6 +61,10 @@ def setup_commands(bot):
 
         old_channel = interaction.guild.get_channel(
             ROOMS[current_room]["command_channel_id"]
+
+        old_channel_main = interaction.guild.get_channel(
+            ROOMS[current_room]["command_channel_id"]
+                        
         )
         
         result = move_player(
@@ -168,7 +112,7 @@ def setup_commands(bot):
         print("new_channel_main =", repr(new_channel_main))
         print("new_channel =", repr(new_channel))
         
-        await old_channel.set_permissions(
+        await old_channel_main.set_permissions(
             interaction.user,
             view_channel=False
         )
@@ -177,6 +121,10 @@ def setup_commands(bot):
             interaction.user,
             view_channel=True
         )
+
+        overwrites = new_channel_main.overwrites_for(member)
+
+        print(overwrites.view_channel)
     
     @bot.tree.command(
     name="look",
@@ -247,6 +195,7 @@ def setup_commands(bot):
             f"You glance around cabin {current_room}.",
             f"The dimly lit cabin {current_room} stretches around you.",
             f"You survey your surroundings in cabin {current_room}."
+            f"Lo, thou standest within Cabin {current_room}, borne ever onward by the great locomotive. Around thee lie the furnishings of the carriage, whilst beyond its walls the thunderous song of wheel and rail proclaimeth the train's relentless advance."
         ]
 
         look_message = random.choice(look_messages)
@@ -279,28 +228,6 @@ def setup_commands(bot):
             ephemeral=True
     )
 
-    @bot.tree.command(name="checkplayers")
-    async def checkplayers(interaction: discord.Interaction):
-
-        has_admin_role = any(
-                role.id == ADMIN_ROLE_ID
-                for role in interaction.user.roles
-            )
-
-        if not has_admin_role:
-
-            await interaction.response.send_message(
-                "You can't do that, silly.",
-                ephemeral=True
-            )
-
-            return
-        
-        await interaction.response.send_message(
-            f"```py\n{players}\n```",
-            ephemeral=True
-        )
-
     @bot.tree.command(name="fixme")
     async def fixme(interaction: discord.Interaction):
 
@@ -317,7 +244,7 @@ def setup_commands(bot):
             new_room = players[user_id]["room"]
 
             new_channel = interaction.guild.get_channel(
-                ROOMS[old_room]["channel_id"]
+                ROOMS[new_room]["channel_id"]
             )
         
             await interaction.response.send_message(
@@ -334,3 +261,21 @@ def setup_commands(bot):
                 interaction.user,
                 view_channel=True
             )
+
+    @bot.tree.command(name="forumpermtest")
+    async def forumpermtest(interaction):
+
+        forum = interaction.guild.get_channel(ROOM6_ID)
+
+        await forum.set_permissions(
+            interaction.user,
+            view_channel=True
+        )
+
+        await interaction.response.send_message(
+            "done",
+            ephemeral=True
+        )
+
+        print(forum.overwrites_for(interaction.user))
+    
