@@ -61,6 +61,10 @@ def setup_commands(bot):
 
         old_channel = interaction.guild.get_channel(
             ROOMS[current_room]["command_channel_id"]
+
+        old_channel_main = interaction.guild.get_channel(
+            ROOMS[current_room]["command_channel_id"]
+                        
         )
         
         result = move_player(
@@ -108,7 +112,7 @@ def setup_commands(bot):
         print("new_channel_main =", repr(new_channel_main))
         print("new_channel =", repr(new_channel))
         
-        await old_channel.set_permissions(
+        await old_channel_main.set_permissions(
             interaction.user,
             view_channel=False
         )
