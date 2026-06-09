@@ -165,6 +165,8 @@ def setup_commands(bot):
         print("Thread ID:", ROOMS[result]["command_channel_id"])
         print("Forum object:", new_channel_main)
         print("Thread object:", new_channel)
+        print(type(new_channel_main))
+        print(type(new_channel))
         
         await old_channel.set_permissions(
             interaction.user,
