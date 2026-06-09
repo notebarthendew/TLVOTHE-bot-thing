@@ -22,11 +22,13 @@ from cogs.commands import setup_commands as setup_slash_commands
 from cogs.prefix_commands import setup_commands as setup_prefix_commands
 from cogs.game_commands import setup_commands as setup_game_commands
 from cogs.message_commands import setup_commands as setup_message_events
+from cogs.admin_commands import setup_commands as setup_admin_commands
 
 setup_slash_commands(bot)
 setup_prefix_commands(bot)
 setup_game_commands(bot)
 setup_message_events(bot)
+setup_admin_commands(bot)
 
 @bot.event
 async def on_ready():
