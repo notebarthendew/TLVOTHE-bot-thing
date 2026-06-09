@@ -305,22 +305,30 @@ def setup_commands(bot):
             user_id = str(interaction.user.id)
 
             old_room = players[user_id]["room"]
+
+            old_channel = interaction.guild.get_channel(
+                ROOMS[old_room]["channel_id"]
+            )
         
             players[user_id]["room"] = "5"
 
             new_room = players[user_id]["room"]
+
+            new_channel = interaction.guild.get_channel(
+                ROOMS[old_room]["channel_id"]
+            )
         
             await interaction.response.send_message(
                 "Returned to room 5.",
                 ephemeral=True
             )
 
-            await old_room.set_permissions(
+            await old_channel.set_permissions(
                 interaction.user,
                 view_channel=False
             )
 
-            await new_room.set_permissions(
+            await new_channel.set_permissions(
                 interaction.user,
                 view_channel=True
             )
