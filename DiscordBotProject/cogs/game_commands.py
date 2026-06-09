@@ -235,7 +235,7 @@ def setup_commands(bot):
             new_room = players[user_id]["room"]
 
             new_channel = interaction.guild.get_channel(
-                ROOMS[old_room]["channel_id"]
+                ROOMS[new_room]["channel_id"]
             )
         
             await interaction.response.send_message(
