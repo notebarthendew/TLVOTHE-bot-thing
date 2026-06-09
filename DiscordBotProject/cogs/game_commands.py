@@ -121,6 +121,10 @@ def setup_commands(bot):
             interaction.user,
             view_channel=True
         )
+
+        overwrites = new_channel_main.overwrites_for(member)
+
+        print(overwrites.view_channel)
     
     @bot.tree.command(
     name="look",
