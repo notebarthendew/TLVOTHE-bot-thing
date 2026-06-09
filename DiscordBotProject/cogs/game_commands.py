@@ -87,7 +87,13 @@ def setup_commands(bot):
             ROOMS[result]["command_channel_id"]
 
         )
-            
+
+        if new_channel is None:
+
+            new_channel = interaction.guild.get_thread(
+                ROOMS[result]["command_channel_id"]
+            )
+        
         new_channel_main = interaction.guild.get_channel(
             ROOMS[result]["channel_id"]         
         )
