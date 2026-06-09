@@ -119,7 +119,8 @@ Focusing on: Channel visibility system
 
 Current implemented/planned systems:
 [+] Full room movement
-[-] Channel visibility system
+[+] Channel visibility system
+[-] Administrative tools
 [ ] Role assignment
 [ ] Evidence system
 [ ] Sound propagation
@@ -127,7 +128,6 @@ Current implemented/planned systems:
 [ ] Inventory system
 [ ] Mood system (scary)
 [ ] Match flow system
-[ ] Administrative tools
 [ ] Expanded train map
 
 ("+" means finished, "-" means being worked on.)
@@ -136,6 +136,5 @@ Current implemented/planned systems:
   
 This project is currently in active development.
 
-Game systems, balance, roles, mechanics, and structure may
-change over time.
+Game systems, balance, roles, mechanics, and structure may change over time.
   
