@@ -61,7 +61,9 @@ def setup_commands(bot):
 
         old_channel = interaction.guild.get_channel(
             ROOMS[current_room]["command_channel_id"]
+        )
 
+            
         old_channel_main = interaction.guild.get_channel(
             ROOMS[current_room]["command_channel_id"]
                         
