@@ -2,10 +2,10 @@
 
 players = {}
 
-def create_player(user_id, nickname):
+def create_player(user_id, nickname, spawn_room):
 
     players[user_id] = {
-        "room": "1",
+        "room": spawn_room,
         "alive": True,
         "role": None,
         "inventory": [],
