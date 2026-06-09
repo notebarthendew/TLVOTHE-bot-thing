@@ -18,4 +18,15 @@ def setup_commands(bot):
                                             "* '?cheese' Send a cheese gif (not random)\n"
                                             "* '?revolver' Send a Revolver (<:Revolver:1505709394057494659>) emoji"
                                             )
-    print("Sent 'commands' slash command")
+
+  @bot.tree.command(name="game commands")
+  async def game_commands(interaction: discord.Interaction):
+    await interaction.response.send_message(" # TVLOTHE BOT *GAME* COMMANDS\n"
+                                            "*You are able to use these commands if you are in the game.*"
+                                            "## Actions\n"
+                                            "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
+                                            "* '/look' Get information about the room you are currently in.\n"
+                                            "*This will be regularly updated until all planned actions are implemented.*"
+                                            )
+    
+
