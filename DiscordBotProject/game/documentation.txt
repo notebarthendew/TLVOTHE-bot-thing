@@ -115,11 +115,11 @@ do your tasks, consider this as wip for now
 
 ----- CURRENT DEVELOPMENT -----
 
-Focusing on: Github Structure
+Focusing on: Channel visibility system
 
 Current implemented/planned systems:
-[ ] Full room movement
-[ ] Channel visibility system
+[+] Full room movement
+[-] Channel visibility system
 [ ] Role assignment
 [ ] Evidence system
 [ ] Sound propagation
@@ -129,6 +129,8 @@ Current implemented/planned systems:
 [ ] Match flow system
 [ ] Administrative tools
 [ ] Expanded train map
+
+("+" means finished, "-" means being worked on.)
 
 ----- NOTE -----
   
