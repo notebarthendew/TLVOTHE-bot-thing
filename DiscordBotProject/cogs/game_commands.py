@@ -266,21 +266,3 @@ def setup_commands(bot):
                 interaction.user,
                 view_channel=True
             )
-
-    @bot.tree.command(name="forumpermtest")
-    async def forumpermtest(interaction):
-
-        forum = interaction.guild.get_channel(ROOM6_ID)
-
-        await forum.set_permissions(
-            interaction.user,
-            view_channel=True
-        )
-
-        await interaction.response.send_message(
-            "done",
-            ephemeral=True
-        )
-
-        print(forum.overwrites_for(interaction.user))
-    
