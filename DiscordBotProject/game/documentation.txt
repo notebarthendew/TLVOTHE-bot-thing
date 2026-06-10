@@ -120,6 +120,7 @@ Focusing on: Channel visibility system
 Current implemented/planned systems:
 [+] Full room movement
 [+] Channel visibility system
+[+] Expanded train map
 [-] Administrative tools
 [ ] Role assignment
 [ ] Evidence system
@@ -128,7 +129,6 @@ Current implemented/planned systems:
 [ ] Inventory system
 [ ] Mood system (scary)
 [ ] Match flow system
-[ ] Expanded train map
 
 ("+" means finished, "-" means being worked on.)
 

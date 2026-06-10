@@ -1,12 +1,22 @@
 from discord import app_commands
 import discord
 
+import random
+import time
+
 def setup_commands(bot):
 
   @bot.tree.command(name="ping")
   async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("Pong!")
 
+  @bot.tree.command(name="d20roll")
+  async def d20roll(interaction: discord.Interaction):
+    roll = random.randint(1, 20)
+    await interaction.response.send_message("You rolled...")
+    time.sleep(3)
+    await interaction.response.send_message(f"{roll}.")
+  
   @bot.tree.command(name="commands")
   async def commands(interaction: discord.Interaction):
     await interaction.response.send_message(" # TVLOTHE BOT COMMANDS\n"

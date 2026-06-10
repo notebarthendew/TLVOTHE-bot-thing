@@ -24,15 +24,3 @@ def setup_commands(bot):
         await ctx.reply(f"Heres a gun\n"
                        "# <:Revolver:1505709394057494659>")
         print("Sent revolver prefix command")
-
-    @bot.command()
-    async def commands(ctx):
-        await ctx.reply(" # TVLOTHE BOT COMMANDS\n"
-                        "## Slash Commands\n"
-                        "* '/ping' Send pong.\n"
-                        "## Prefix Commands\n"
-                        "* '?hello' Say hi and ping the caller\n"
-                        "* '?reply' Send a discord reply to the caller\n"
-                        "* '?cheese' Send a cheese gif (not random)\n"
-                        "* '?revolver' Send a Revolver (<:Revolver:1505709394057494659>) emoji"
-                       )

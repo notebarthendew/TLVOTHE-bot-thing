@@ -2,7 +2,7 @@
 from discord import app_commands
 import discord
 
-from game.player import players, create_player
+from game.player import players, create_player, remove_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from game.map import ROOMS
@@ -107,7 +107,72 @@ def setup_commands(bot):
             ephemeral=True
         )
 
+    @bot.tree.command(
+        name="remove",
+        description="Remove a player from the game (aka admin /kill)"
+    )
 
+    @app_commands.describe(
+        member="The player to remove"
+    )
+
+    async def remove(
+        interaction: discord.Interaction,
+        member: discord.Member,
+    ):
+
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
+            
+        user_id = str(member.id)
+
+        if user_id not in players:
+
+            await interaction.response.send_message(
+                "That player is not in the game.",
+                ephemeral=True
+            )
+
+            return
+
+        for room_data in ROOMS.values():
+
+            channel = interaction.guild.get_channel(
+                room_data["channel_id"]
+            )
+
+            if channel is not None:
+
+                await channel.set_permissions(
+                    member,
+                    overwrite=None
+                )
+
+        game_role = interaction.guild.get_role(
+            GAME_ROLE_ID
+        )
+
+        if game_role is not None:
+            await member.remove_roles(game_role)
+
+        remove_player(user_id)
+        
+        await interaction.response.send_message(
+            f"{member.mention} was removed from the game.",
+            ephemeral=True
+        )
+    
     @bot.tree.command(name="checkplayers")
     async def checkplayers(interaction: discord.Interaction):
 
