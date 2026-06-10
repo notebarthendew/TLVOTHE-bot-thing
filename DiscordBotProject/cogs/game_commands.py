@@ -65,7 +65,7 @@ def setup_commands(bot):
 
             
         old_channel_main = interaction.guild.get_channel(
-            ROOMS[current_room]["command_channel_id"]
+            ROOMS[current_room]["channel_id"]
                         
         )
         
@@ -130,9 +130,6 @@ def setup_commands(bot):
             view_channel=True
         )
 
-        overwrites = new_channel_main.overwrites_for(member)
-
-        print(overwrites.view_channel)
     
     @bot.tree.command(
     name="look",
