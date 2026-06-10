@@ -10,8 +10,8 @@ def setup_commands(bot):
   async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("Pong!")
 
-  @bot.tree.command(name="ping")
-  async def ping(interaction: discord.Interaction):
+  @bot.tree.command(name="d20roll")
+  async def d20roll(interaction: discord.Interaction):
     roll = random.randint(1, 20)
     await interaction.response.send_message("You rolled...")
     time.sleep(3)
