@@ -2,7 +2,7 @@
 from discord import app_commands
 import discord
 
-from game.player import players, create_player
+from game.player import players, create_player, remove_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from game.map import ROOMS
@@ -109,7 +109,7 @@ def setup_commands(bot):
 
     @bot.tree.command(
         name="remove",
-        description="Remove a player to the game"
+        description="Remove a player from the game (aka admin /kill)"
     )
 
     @app_commands.describe(
@@ -134,6 +134,7 @@ def setup_commands(bot):
             )
 
             return
+            
         user_id = str(member.id)
 
         if user_id not in players:
@@ -144,8 +145,6 @@ def setup_commands(bot):
             )
 
             return
-
-        room = players[user_id]["room"]
 
         for room_data in ROOMS.values():
 
@@ -164,8 +163,11 @@ def setup_commands(bot):
             GAME_ROLE_ID
         )
 
-        await member.remove_roles(game_role)
+        if game_role is not None:
+            await member.remove_roles(game_role)
 
+        remove_player(user_id)
+        
         await interaction.response.send_message(
             f"{member.mention} was removed from the game.",
             ephemeral=True
