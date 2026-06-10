@@ -29,7 +29,7 @@ def setup_commands(bot):
                                             "* '?revolver' Send a Revolver (<:Revolver:1505709394057494659>) emoji"
                                             )
 
-  @bot.tree.command(name="game commands")
+  @bot.tree.command(name="game_commands")
   async def game_commands(interaction: discord.Interaction):
     await interaction.response.send_message(" # TVLOTHE BOT *GAME* COMMANDS\n"
                                             "*You are able to use these commands if you are in the game.*"
