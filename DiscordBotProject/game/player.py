@@ -14,3 +14,8 @@ def create_player(user_id, nickname, spawn_room):
     }
     print(f"Created player: {user_id}")
     print(players)
+
+def remove_player(user_id):
+
+    if user_id in players:
+        del players[user_id]
