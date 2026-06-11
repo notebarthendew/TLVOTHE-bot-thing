@@ -66,8 +66,11 @@ def setup_commands(bot):
             
         old_channel_main = interaction.guild.get_channel(
             ROOMS[current_room]["channel_id"]
-                        
         )
+        if old_channel_main is None:
+            old_channel_main = interaction.guild.get_thread(
+                ROOMS[current_room]["channel_id"]
+            )
         
         result = move_player(
             players[user_id],
