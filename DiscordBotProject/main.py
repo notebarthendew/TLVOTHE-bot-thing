@@ -18,6 +18,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='?', intents=intents)
 
+from game.player import load_players
 from cogs.commands import setup_commands as setup_slash_commands
 from cogs.prefix_commands import setup_commands as setup_prefix_commands
 from cogs.game_commands import setup_commands as setup_game_commands
@@ -63,5 +64,6 @@ async def on_guild_join(guild):
         except discord.HTTPException as e:
             print(f"Failed to send join message: {e}")
 
+load_players()
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
