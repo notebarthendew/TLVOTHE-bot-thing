@@ -1,5 +1,7 @@
 # code for each player contesting in thvothe
 
+import json
+
 players = {}
 
 def create_player(user_id, nickname, spawn_room):
@@ -19,3 +21,33 @@ def remove_player(user_id):
 
     if user_id in players:
         del players[user_id]
+
+def save_players():
+
+    with open(
+        "players.json",
+        "w"
+    ) as file:
+
+        json.dump(
+            players,
+            file,
+            indent=4
+        )
+
+def load_players():
+
+    global players
+
+    try:
+
+        with open(
+            "players.json",
+            "r"
+        ) as file:
+
+            players = json.load(file)
+
+    except FileNotFoundError:
+
+        players = {}
