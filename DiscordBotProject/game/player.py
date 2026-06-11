@@ -28,7 +28,8 @@ def load_players():
             "r"
         ) as file:
 
-            players = json.load(file)
+            players.clear()
+            players.update(json.load(file))
 
     except FileNotFoundError:
 
