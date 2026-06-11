@@ -119,6 +119,9 @@ def setup_commands(bot):
         print("Thread object:", new_channel)
         print("new_channel_main =", repr(new_channel_main))
         print("new_channel =", repr(new_channel))
+        print("HIDING:", old_channel_main)
+        print("SHOWING:", new_channel_main)
+
         
         await old_channel_main.set_permissions(
             interaction.user,
