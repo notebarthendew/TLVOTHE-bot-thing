@@ -1,6 +1,7 @@
 # the main code for moving around the map
 
 from game.map import ROOMS
+from game.player import save_players
 
 def move_player(player_data, direction):
 
@@ -16,4 +17,6 @@ def move_player(player_data, direction):
     
     player_data["room"] = new_room
 
+    save_players()
+    
     return new_room
