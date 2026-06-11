@@ -19,8 +19,6 @@ def save_players():
 
 def load_players():
 
-    global players
-
     try:
 
         with open(
@@ -29,11 +27,13 @@ def load_players():
         ) as file:
 
             players.clear()
-            players.update(json.load(file))
+            players.update(
+                json.load(file)
+            )
 
     except FileNotFoundError:
 
-        players = {}
+        players.clear()
 
 def create_player(user_id, nickname, spawn_room):
 
