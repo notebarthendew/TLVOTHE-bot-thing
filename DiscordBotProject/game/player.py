@@ -1,39 +1,25 @@
 # code for each player contesting in thvothe
 
 import json
+from pathlib import Path
 
 players = {}
 
+PLAYERS_FILE = Path(__file__).resolve().parent.parent / "data" / "players.json"
+
 def save_players():
-
-    with open(
-        "players.json",
-        "w"
-    ) as file:
-
-        json.dump(
-            players,
-            file,
-            indent=4
-        )
+    PLAYERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with PLAYERS_FILE.open("w", encoding="utf-8") as file:
+        json.dump(players, file, indent=4)
 
 def load_players():
-
-    try:
-
-        with open(
-            "players.json",
-            "r"
-        ) as file:
-
+    if PLAYERS_FILE.exists():
+        with PLAYERS_FILE.open("r", encoding="utf-8") as file:
             players.clear()
-            players.update(
-                json.load(file)
-            )
-
-    except FileNotFoundError:
-
+            players.update(json.load(file))
+    else:
         players.clear()
+        save_players()
 
 def create_player(user_id, nickname, spawn_room):
 
