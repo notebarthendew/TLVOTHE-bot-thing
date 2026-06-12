@@ -3,10 +3,12 @@ import random
 from discord import app_commands
 import discord
 
-from game.player import players, create_player
+from game.player import players, create_player, save_player
 from game.movement import move_player
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
+from utils.constants import DEAD_ROLE_ID
+from utils.helpers import check_player_status
 from game.map import ROOMS
 
 
@@ -35,13 +37,9 @@ def setup_commands(bot):
 
         user_id = str(interaction.user.id)
         
-        if user_id not in players:
-
-            await interaction.response.send_message(
-                "*You are not in a train vrotato.*",
-                ephemeral=True
-            )
-
+        error = check_player_status(str(interaction.user.id))
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
             return
 
         nickname = players[user_id]["nickname"]
@@ -146,13 +144,9 @@ def setup_commands(bot):
 
         user_id = str(interaction.user.id)
         
-        if user_id not in players:
-
-            await interaction.response.send_message(
-                "*You look around to see that you are not in a train*. **(Not in game)**",
-                ephemeral=True
-            )
-
+        error = check_player_status(str(interaction.user.id))
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
             return
 
         current_room = players[user_id]["room"]
@@ -218,6 +212,57 @@ def setup_commands(bot):
             ephemeral=True
         )
         
+
+    @bot.tree.command(
+        name="kill",
+        description="Kill a player"
+    )
+    @app_commands.describe(target="The player to kill")
+    async def kill(
+        interaction: discord.Interaction,
+        target: discord.Member
+    ):
+        user_id = str(interaction.user.id)
+        target_id = str(target.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        error = check_player_status(target_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        if players[user_id]["room"] != players[target_id]["room"]:
+            await interaction.response.send_message(
+                 "That player is not in the same room as you.",
+                ephemeral=True
+            )
+            return
+
+        players[target_id]["alive"] = False
+        save_players()
+
+        dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
+        game_role = interaction.guild.get_role(GAME_ROLE_ID)
+
+        await target.remove_roles(game_role)
+        await target.add_roles(dead_role)
+
+        target_nickname = players[target_id]["nickname"]
+        killer_nickname = players[user_id]["nickname"]
+
+        current_room = players[user_id]["room"]
+        room_channel = interaction.guild.get_channel(ROOMS[current_room]["channel_id"])
+
+        await interaction.response.send_message(
+            f"*{killer_nickname} lunges out to {target_nickname}, they fight against them, but suddenly; {target_nickname} collapses to the floor.*"
+        )
+        await room_channel.send(
+            f"*{target_nickname} has died.*"
+        )
     
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
