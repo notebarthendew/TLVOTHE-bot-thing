@@ -2,7 +2,7 @@ from discord import app_commands
 import discord
 
 import random
-import time
+import ansycio
 
 def setup_commands(bot):
 
@@ -14,8 +14,8 @@ def setup_commands(bot):
   async def d20roll(interaction: discord.Interaction):
     roll = random.randint(1, 20)
     await interaction.response.send_message("You rolled...")
-    time.sleep(3)
-    await interaction.response.send_message(f"{roll}.")
+    await asyncio.sleep(3)
+    await interaction.followup.send(f"{roll}.")
   
   @bot.tree.command(name="commands")
   async def commands(interaction: discord.Interaction):
@@ -36,7 +36,9 @@ def setup_commands(bot):
                                             "## Actions\n"
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
                                             "* '/look' Get information about the room you are currently in.\n"
+                                            "* '/kill' Kill a player. This is a debug command to test the dead people system.\n"
                                             "*This will be regularly updated until all planned actions are implemented.*"
+                                            ephimeral=True
                                             )
     
 
