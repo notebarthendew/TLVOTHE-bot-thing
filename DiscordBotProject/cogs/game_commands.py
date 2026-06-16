@@ -181,7 +181,7 @@ def setup_commands(bot):
             )
             corpse_section = (
                 f"\n\nCorpses here:\n"
-                f"{corpses_text}"
+                f"{corpses_text}\n\n"
             )
         else:
             corpse_section = ""
@@ -218,7 +218,7 @@ def setup_commands(bot):
         await interaction.response.send_message(
             f"{look_message}\n\n"
             f"People here:\n{people_text}\n\n"
-            f"{corpse_section}\n\n"
+            f"{corpse_section}"
             f"Exits:\n{exits_text}",
             ephemeral=True
         )
