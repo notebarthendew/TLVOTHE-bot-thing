@@ -221,7 +221,7 @@ def setup_commands(bot):
         
         await interaction.response.send_message(
             f"{look_message}\n"
-            f"{description}\n"
+            f"{description}\n\n"
             f"People here:\n{people_text}\n\n"
             f"{corpse_section}"
             f"Exits:\n{exits_text}",
