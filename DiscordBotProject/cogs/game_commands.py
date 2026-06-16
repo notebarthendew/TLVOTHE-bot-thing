@@ -111,18 +111,6 @@ def setup_commands(bot):
         await new_channel.send(
             f"*{nickname} arrives from the {arrival_direction} of the train.*"
         )
-
-        print("Current room:", current_room)
-        print("Result room:", result)
-        print("Forum ID:", ROOMS[result]["channel_id"])
-        print("Thread ID:", ROOMS[result]["command_channel_id"])
-        print("Forum object:", new_channel_main)
-        print("Thread object:", new_channel)
-        print("new_channel_main =", repr(new_channel_main))
-        print("new_channel =", repr(new_channel))
-        print("HIDING:", old_channel_main)
-        print("SHOWING:", new_channel_main)
-
         
         await old_channel_main.set_permissions(
             interaction.user,
@@ -156,15 +144,25 @@ def setup_commands(bot):
         back_room = room_data["back"]
         
         people_in_room = []
+        corpses_in_room = []
 
         for player_id, player_data in players.items():
 
             if player_id == user_id:
                 continue
             
-            if player_data["room"] == current_room:
+            if player_data["room"] != current_room:
+                continue
+
+            if player_data["alive"]:
 
                 people_in_room.append(
+                    player_data["nickname"]
+                )
+
+            else:
+
+                corpses_in_room.append(
                     player_data["nickname"]
                 )
 
@@ -176,6 +174,18 @@ def setup_commands(bot):
                 for person in people_in_room
             )
 
+        if corpses_in_room:
+            corpses_text = "\n".join(
+                f"- {corpse}"
+                for corpse in corpses_in_room
+            )
+            corpse_section = (
+                f"\n\nCorpses here:\n"
+                f"{corpses_text}"
+            )
+        else:
+            corpse_section = ""
+        
         exits = []
 
         if room_data["front"] is not None:
@@ -208,6 +218,7 @@ def setup_commands(bot):
         await interaction.response.send_message(
             f"{look_message}\n\n"
             f"People here:\n{people_text}\n\n"
+            f"{corpse_section}\n\n"
             f"Exits:\n{exits_text}",
             ephemeral=True
         )
