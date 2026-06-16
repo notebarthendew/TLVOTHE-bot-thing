@@ -140,6 +140,10 @@ def setup_commands(bot):
         current_room = players[user_id]["room"]
         room_data = ROOMS[current_room]
 
+        description = random.choice(
+            ROOMS[current_room]["look_descriptions"]
+        )
+        
         front_room = room_data["front"]
         back_room = room_data["back"]
         
@@ -180,7 +184,7 @@ def setup_commands(bot):
                 for corpse in corpses_in_room
             )
             corpse_section = (
-                f"\n\nCorpses here:\n"
+                f"Corpses here:\n"
                 f"{corpses_text}\n\n"
             )
         else:
@@ -216,7 +220,8 @@ def setup_commands(bot):
         look_message = random.choice(look_messages)
         
         await interaction.response.send_message(
-            f"{look_message}\n\n"
+            f"{look_message}\n"
+            f"{description}\n"
             f"People here:\n{people_text}\n\n"
             f"{corpse_section}"
             f"Exits:\n{exits_text}",
