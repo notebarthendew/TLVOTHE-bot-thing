@@ -16,6 +16,8 @@ def load_players():
     if PLAYERS_FILE.exists():
         with PLAYERS_FILE.open("r", encoding="utf-8") as file:
 
+            content = file.read()
+            
             print("FILE CONTENTS:")
             print(repr(content))
 
