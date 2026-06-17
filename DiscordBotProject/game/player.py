@@ -15,6 +15,12 @@ def save_players():
 def load_players():
     if PLAYERS_FILE.exists():
         with PLAYERS_FILE.open("r", encoding="utf-8") as file:
+
+            print("FILE CONTENTS:")
+            print(repr(content))
+
+            file.seek(0)
+    
             players.clear()
             players.update(json.load(file))
     else:
