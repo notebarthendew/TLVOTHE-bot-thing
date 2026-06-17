@@ -8,6 +8,10 @@ players = {}
 PLAYERS_FILE = Path(__file__).resolve().parent.parent / "data" / "players.json"
 
 def save_players():
+
+    print("SAVE PLAYERS CALLED")
+    print(players)
+    
     PLAYERS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with PLAYERS_FILE.open("w", encoding="utf-8") as file:
         json.dump(players, file, indent=4)
