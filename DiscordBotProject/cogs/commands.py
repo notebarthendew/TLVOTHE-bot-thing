@@ -37,6 +37,7 @@ def setup_commands(bot):
                                             "## Actions\n"
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
                                             "* '/look' Get information about the room you are currently in.\n"
+                                            "* '/inventory' Look into the item you have in your inventory.\n"
                                             "* '/kill' Kill a player. This is a debug command to test the dead people system.\n"
                                             "*This will be regularly updated until all planned actions are implemented.*",
                                             ephimeral=True

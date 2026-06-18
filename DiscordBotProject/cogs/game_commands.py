@@ -5,6 +5,7 @@ import discord
 
 from game.player import players, create_player, save_players
 from game.movement import move_player
+from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
@@ -279,20 +280,42 @@ def setup_commands(bot):
         await room_channel.send(
             f"*{target_nickname} has died.*"
         )
-    
+
+    @bot.tree.command(name="inventory")
+    async def inventory(interaction: discord.Interaction):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        player_inventory = players[user_id]["inventory"]
+        
+        if player_inventory:
+            inventory_text = "\n".join(
+                f"- {ITEMS[item]['name']}"
+                for item in player_inventory
+            )
+        else:
+            inventory_text = "- Nothing (So much for a high-profile character, smh)"
+
+        await interaction.response.send_message(
+            "You scramble through your pockets, and you find:\n\n"
+            f"{inventory_text}",
+            ephemeral=True
+        )
+            
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
 
-        if user_id not in players:
-
-            await interaction.response.send_message(
-                "*You don't have a room*. **(Not in game)**",
-                ephemeral=True
-            )
-
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
             return
     
         await interaction.response.send_message(

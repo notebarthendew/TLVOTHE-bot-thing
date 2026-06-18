@@ -3,6 +3,7 @@ from discord import app_commands
 import discord
 
 from game.player import players, create_player, remove_player
+from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from game.map import ROOMS
@@ -25,6 +26,23 @@ def setup_commands(bot):
             if current.lower() in room_id.lower()
         ][:25]
 
+    async def item_autocomplete(
+        interaction,
+        current: str
+    ):
+        return [
+            app_commands.Choice(
+                name=data["name"],
+                value=item_id
+            )
+            for item_id, data in ITEMS.items()
+            if (
+                current.lower() in item_id.lower() 
+                or
+                current.lower() in data["name"].lower()
+            )
+            
+        ][:25]
     
     @bot.tree.command(
         name="add",
@@ -194,3 +212,64 @@ def setup_commands(bot):
             f"```py\n{players}\n```",
             ephemeral=True
         )
+
+    @bot.tree.command(name="itemgive")
+
+    @app_commands.describe(
+        member="(ADMIN) Give a player an item."
+    )
+
+    @app_commands.autocomplete(
+        item=item_autocomplete
+    )
+    
+    async def itemgive(
+        interaction: discord.Interaction,
+        member: discord.Member,
+        item: str
+    ):
+
+        
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
+
+        user_id = str(member.id)
+
+        if user_id not in players:
+
+            await interaction.response.send_message(
+                f"{member.mention} is not in the game..",
+                ephemeral=True
+            )
+
+            return
+
+        if item not in ITEMS:
+
+            await interaction.response.send_message(
+                "That item does not exist.",
+                ephemeral=True
+            )
+
+            return
+
+        players[user_id]["inventory"].append(item)
+
+        save_players()
+
+        await interaction.response.send_message(
+            f"Gave **{ITEMS[item]['name']}** to {member.mention}.",
+            ephemeral=True
+        )
+        
