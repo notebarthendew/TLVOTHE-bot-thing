@@ -5,6 +5,7 @@ import discord
 
 from game.player import players, create_player, save_players
 from game.movement import move_player
+from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
@@ -294,7 +295,7 @@ def setup_commands(bot):
         
         if player_inventory:
             inventory_text = "\n".join(
-                f"- {item}"
+                f"- {ITEMS[item]['name']}"
                 for item in player_inventory
             )
         else:
