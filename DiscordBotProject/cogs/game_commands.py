@@ -279,20 +279,33 @@ def setup_commands(bot):
         await room_channel.send(
             f"*{target_nickname} has died.*"
         )
-    
+
+    @bot.tree.command(name="inventory")
+    async def inventory(interaction: discord.Interaction):
+
+        user_id = (str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        inventory = players[target_id]["inventory"]
+        
+        if inventory:
+            inventory_text = "\n".join(
+                f"- {corpse}"
+                for corpse in corpses_in_room
+                   
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
 
-        if user_id not in players:
-
-            await interaction.response.send_message(
-                "*You don't have a room*. **(Not in game)**",
-                ephemeral=True
-            )
-
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
             return
     
         await interaction.response.send_message(
