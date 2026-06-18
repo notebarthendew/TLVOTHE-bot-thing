@@ -283,20 +283,29 @@ def setup_commands(bot):
     @bot.tree.command(name="inventory")
     async def inventory(interaction: discord.Interaction):
 
-        user_id = (str(interaction.user.id)
+        user_id = str(interaction.user.id)
 
         error = check_player_status(user_id)
         if error:
             await interaction.response.send_message(error, ephemeral=True)
             return
 
-        inventory = players[target_id]["inventory"]
+        player_inventory = players[user_id]["inventory"]
         
-        if inventory:
+        if player_inventory:
             inventory_text = "\n".join(
-                f"- {corpse}"
-                for corpse in corpses_in_room
-                   
+                f"- {item}"
+                for item in player_inventory
+            )
+        else:
+            inventory_text = "- Nothing (So much for a high-profile character, smh)"
+
+        await interaction.response.send_message(
+            "You scramble through your pockets, and you find:\n\n"
+            f"{inventory_text}",
+            ephemeral=True
+        )
+            
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):
