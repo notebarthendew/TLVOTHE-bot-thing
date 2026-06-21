@@ -15,8 +15,24 @@ from game.map import ROOMS
 
 def setup_commands(bot):
 
-    # --- PLAYER ACTIONS ---
+    async def inventory_item_autocomplete(
+    interaction,
+    current: str
+):
+    user_id = str(interaction.user.id)
 
+    if user_id not in players:
+        return []
+
+    return [
+        app_commands.Choice(
+            name=ITEMS[item]["name"],
+            value=item
+        )
+        for item in players[user_id]["inventory"]
+        if current.lower() in item.lower()
+    ][:25]
+    
     @bot.tree.command(
     name="move",
     description="Move through the train"
@@ -306,7 +322,71 @@ def setup_commands(bot):
             f"{inventory_text}",
             ephemeral=True
         )
-            
+
+    @bot.tree.command(name="use")
+
+    @app_commands.autocomplete(
+        item=inventory_item_autocomplete
+    )
+
+    async def use(
+        interaction: discord.Interaction,
+        item: str
+    ):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+
+        if error:
+
+            await interaction.response.send_message(
+                error,
+                ephemeral=True
+            )
+    
+            return
+
+        if item not in players[user_id]["inventory"]:
+
+            await interaction.response.send_message(
+                "You don't have that item.",
+                ephemeral=True
+            )
+
+            return
+
+        item_data = ITEMS[item]
+
+        if not item_data["usable"]:
+
+            await interaction.response.send_message(
+                "That item cannot be used.",
+                ephemeral=True
+            )
+
+            return
+
+        if item_data["target_type"] != "none":
+
+            await interaction.response.send_message(
+                "That item requires a target.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.send_message(
+            item_data["text"],
+            ephemeral=True
+        )
+
+        if item_data["consumable"]:
+
+            players[user_id]["inventory"].remove(item)
+
+            save_players()
+    
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):
