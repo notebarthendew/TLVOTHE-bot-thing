@@ -256,6 +256,8 @@ def setup_commands(bot):
 
             return
 
+        print(item)
+        
         if item not in ITEMS:
 
             await interaction.response.send_message(
