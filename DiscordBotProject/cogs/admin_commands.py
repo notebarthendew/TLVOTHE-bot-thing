@@ -2,7 +2,7 @@
 from discord import app_commands
 import discord
 
-from game.player import players, create_player, remove_player
+from game.player import players, create_player, remove_player. save_players
 from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
@@ -229,6 +229,7 @@ def setup_commands(bot):
         item: str
     ):
 
+        print("ITEMGIVE REACHED")
         
         has_admin_role = any(
             role.id == ADMIN_ROLE_ID
@@ -265,8 +266,6 @@ def setup_commands(bot):
             return
 
         players[user_id]["inventory"].append(item)
-
-        save_players()
 
         await interaction.response.send_message(
             f"Gave **{ITEMS[item]['name']}** to {member.mention}.",
