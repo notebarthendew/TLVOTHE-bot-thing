@@ -18,20 +18,20 @@ def setup_commands(bot):
     async def inventory_item_autocomplete(
     interaction,
     current: str
-):
-    user_id = str(interaction.user.id)
+    ):
+        user_id = str(interaction.user.id)
 
-    if user_id not in players:
-        return []
+        if user_id not in players:
+            return []
 
-    return [
-        app_commands.Choice(
-            name=ITEMS[item]["name"],
-            value=item
-        )
-        for item in players[user_id]["inventory"]
-        if current.lower() in item.lower()
-    ][:25]
+        return [
+            app_commands.Choice(
+                name=ITEMS[item]["name"],
+                value=item
+            )
+            for item in players[user_id]["inventory"]
+            if current.lower() in item.lower()
+        ][:25]
     
     @bot.tree.command(
     name="move",
@@ -344,7 +344,7 @@ def setup_commands(bot):
                 error,
                 ephemeral=True
             )
-    
+
             return
 
         if item not in players[user_id]["inventory"]:
