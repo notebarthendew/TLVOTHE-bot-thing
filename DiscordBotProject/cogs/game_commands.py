@@ -486,3 +486,5 @@ def setup_commands(bot):
             players[user_id]["room"],
             ephemeral=True
     )
+
+# h
