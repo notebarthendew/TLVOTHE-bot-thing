@@ -331,7 +331,8 @@ def setup_commands(bot):
 
     async def use(
         interaction: discord.Interaction,
-        item: str
+        item: str,
+        target: discord.Member = None
     ):
 
         user_id = str(interaction.user.id)
@@ -358,6 +359,8 @@ def setup_commands(bot):
 
         item_data = ITEMS[item]
 
+        target_type = item_data["target_type"]
+        
         if not item_data["usable"]:
 
             await interaction.response.send_message(
@@ -367,20 +370,83 @@ def setup_commands(bot):
 
             return
 
-        if item_data["target_type"] != "none":
+        if target_type == "none" and target is not None:
 
             await interaction.response.send_message(
-                "That item requires a target.",
+                "That item doesn't require a target.",
                 ephemeral=True
             )
 
             return
+        
+        if target_type == "player":
 
-        await interaction.response.send_message(
-            item_data["text"],
-            ephemeral=True
-        )
+            if target is None:
 
+                await interaction.response.send_message(
+                    "That item requires a target. (go find someone)",
+                    ephemeral=True
+                )
+
+                return
+
+            target_id = str(target.id)
+            
+            if target_id not in players:
+
+                await interaction.response.send_message(
+                    "That player is not in the game.",
+                    ephemeral=True
+                )
+
+                return
+
+            target_nickname = players[target_id]["nickname"]
+            user_nickname = players[user_id]["nickname"]
+            
+            if players[target_id]["room"] != players[user_id]["room"]:
+
+                await interaction.response.send_message(
+                    "They are not in this room.",
+                    ephemeral=True
+                )
+
+                return
+
+            if not players[target_id]["alive"]:
+
+                await interaction.response.send_message(
+                    "That player is already dead.",
+                    ephemeral=True
+                )
+
+                return
+            
+            if item == "knife":
+
+                players[target_id]["alive"] = False
+
+                save_players()
+
+                if target_id == user_id:
+                    await interaction.response.send_message(
+                        f"{user_nickname} stabbed themselves. (what a way to go out vro)"
+                    )
+                    return
+                
+                else:
+                    await interaction.response.send_message(
+                        f"{target_nickname} got fuckign stabbed to death by {user_nickname}. (l bozo vro got killed)"
+                    )
+                    return
+        
+        if target_type == "none":
+        
+            await interaction.response.send_message(
+                item_data["text"],
+                ephemeral=True
+            )
+        
         if item_data["consumable"]:
 
             players[user_id]["inventory"].remove(item)
