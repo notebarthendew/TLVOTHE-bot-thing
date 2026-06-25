@@ -357,6 +357,8 @@ def setup_commands(bot):
 
             return
 
+        current_room = players[user_id]["room"]
+        
         allowed_channel_id = ROOMS[current_room]["command_channel_id"]
 
         if interaction.channel.id != allowed_channel_id:
@@ -364,7 +366,9 @@ def setup_commands(bot):
             await interaction.response.send_message(
             f"You can only do that from the room you're currently in. (Use the command in the {current_room} channel)",
             ephemeral=True
-        )
+            )
+
+            return
         
         if item not in players[user_id]["inventory"]:
 
@@ -377,6 +381,15 @@ def setup_commands(bot):
 
         item_data = ITEMS[item]
 
+        if item not in ITEMS:
+
+            await interaction.response.send_message(
+                "That item no longer exists.",
+                ephemeral=True
+            )
+
+            return
+        
         target_type = item_data["target_type"]
         
         if not item_data["usable"]:
