@@ -387,9 +387,9 @@ def setup_commands(bot):
             )
 
             return
-        
-        target_type = item_data["target_type"]
+
         item_data = ITEMS[item]
+        target_type = item_data["target_type"]
 
         
         if not item_data["usable"]:
