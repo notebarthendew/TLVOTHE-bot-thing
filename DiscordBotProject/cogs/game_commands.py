@@ -459,14 +459,18 @@ def setup_commands(bot):
 
                 save_players()
 
+                await interaction.response.send_message(
+                    "Action made sucesfully.",
+                    ephemeral=True
+                
                 if target_id == user_id:
-                    await interaction.response.send_message(
+                    await allowed_channel_id.send(
                         f"{user_nickname} stabbed themselves. (what a way to go out vro)"
                     )
                     return
                 
                 else:
-                    await interaction.response.send_message(
+                    await allowed_channel_id.send(
                         f"{target_nickname} got fuckign stabbed to death by {user_nickname}. (l bozo vro got killed)"
                     )
                     return
