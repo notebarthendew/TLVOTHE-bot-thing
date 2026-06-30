@@ -453,27 +453,28 @@ def setup_commands(bot):
 
                 return
             
-            if item == "knife":
+            if action == "kill":
 
                 players[target_id]["alive"] = False
 
                 save_players()
 
                 await interaction.response.send_message(
-                    "Action made sucesfully.",
+                    "Action made successfully.",
                     ephemeral=True
-                
+                )
+
                 if target_id == user_id:
-                    await allowed_channel_id.send(
-                        f"{user_nickname} stabbed themselves. (what a way to go out vro)"
-                    )
-                    return
-                
+                    message = random.choice(item_data["self_kill_messages"])
                 else:
-                    await allowed_channel_id.send(
-                        f"{target_nickname} got fuckign stabbed to death by {user_nickname}. (l bozo vro got killed)"
+                    message = random.choice(item_data["kill_messages"])
+
+                await allowed_channel.send(
+                    message.format(
+                        user=user_nickname,
+                        target=target_nickname
                     )
-                    return
+                )
         
         if target_type == "none":
         
