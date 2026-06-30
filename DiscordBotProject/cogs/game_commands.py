@@ -379,8 +379,6 @@ def setup_commands(bot):
 
             return
 
-        item_data = ITEMS[item]
-
         if item not in ITEMS:
 
             await interaction.response.send_message(
@@ -391,6 +389,8 @@ def setup_commands(bot):
             return
         
         target_type = item_data["target_type"]
+        item_data = ITEMS[item]
+
         
         if not item_data["usable"]:
 
@@ -447,11 +447,16 @@ def setup_commands(bot):
             if not players[target_id]["alive"]:
 
                 await interaction.response.send_message(
-                    "That player is already dead.",
+                    "That player is dead.",
                     ephemeral=True
                 )
 
                 return
+
+            allowed_channel = interaction.guild.get_channel(
+                allowed_channel_id
+            )
+            action = item_data["action"]
             
             if action == "kill":
 
