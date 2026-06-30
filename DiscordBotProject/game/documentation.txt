@@ -100,33 +100,65 @@ That tie back to who did the crime, evidence is intentionally imperfect.
 
 When someone dies, they leave behind a corpse, they do not serve as evidence, but show who died and how.
 After roughly a day, these bodies start to decompose, and finish decomposing after 12 hours, leaving behind a unrecognizable skeleton.
+The death system works as of the latest update of this documentation, also the corpse part isn't fully refined.
 
 ----- ITEM SYSTEM ----
 
-The players can aquire and use items for all sorts of things, every player has their own inventory
-and have to use the /holdout command to take something from the inventory and use it, showing plainly the tiem they're holding.
-Some items require a special condition to be used; sometimes needing a target player or being in a
-specific room to work.
+Players possess their own inventories and can inspect them using /inventory.
+
+Items are used with the /use command. Some items may require a target, while others can simply be read or activated.
+
+Future updates will allow players to pick up, trade, and discover items naturally throughout the train.
 
 ----- MOOD SYSTEM -----
 
 alr vro imma be honest this has bambozleed me for a while now, i cant think on a punishment for when you dont
 do your tasks, consider this as wip for now
 
+
+----- COMMANDS -----
+
+Implemented:
+
+/look
+Move between rooms and observe your surroundings.
+
+/move
+Travel between connected train cars.
+
+/inventory
+View the items you're carrying.
+
+/use
+Use an item from your inventory.
+
+/add
+(Admin) Add a player to the game.
+
+/remove
+(Admin) Remove a player from the game.
+
+/itemgive
+(Admin) Give an item to a player.
+
+/kill
+(Admin) Instantly kill a player.
+
+
 ----- CURRENT DEVELOPMENT -----
 
-Focusing on: Channel visibility system
+Focusing on: /use command, along with inventory stuff
 
 Current implemented/planned systems:
 [+] Full room movement
 [+] Channel visibility system
 [+] Expanded train map
-[-] Administrative tools
+[+] Administrative tools
+[+] Inventory system
 [ ] Role assignment
 [ ] Evidence system
 [ ] Sound propagation
 [ ] Corpse system
-[ ] Inventory system
 [ ] Mood system (scary)
 [ ] Match flow system
 
