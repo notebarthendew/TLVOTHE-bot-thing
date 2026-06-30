@@ -16,7 +16,7 @@ ITEMS = {
         
         "target_type": "player",
 
-        "action": "kill"
+        "action": "kill",
 
         "kill_messages": [
 
