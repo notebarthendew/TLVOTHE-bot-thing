@@ -14,7 +14,31 @@ ITEMS = {
 
         # maybe do somethign abt cooldown with import time and time.time()
         
-        "target_type": "player"
+        "target_type": "player",
+
+        "action": "kill"
+
+        "kill_messages": [
+
+            "{user} plunged the knife into {target}.",
+
+            "{target} was stabbed to death by {user}.",
+
+            "{user} buried the knife into {target}'s chest.",
+
+            "{target} never saw the blade coming.",
+
+        ],
+
+        "self_kill_messages": [
+
+            "{user} stabbed themselves. (what a way to go out vro)",
+
+            "{user} somehow managed to lose a fight against their own knife.",
+
+            "{user} decided life wasn't worth it anymore."
+
+        ]
 
     },
 
