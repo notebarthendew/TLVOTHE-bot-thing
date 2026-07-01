@@ -9,6 +9,7 @@ from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
 from utils.helpers import check_player_status
 from game.map import ROOMS
+from game.room_items import room_items
 
 
 def setup_commands(bot):
@@ -350,3 +351,45 @@ def setup_commands(bot):
         await room_channel.send(
             f"*{target_nickname} has died.*"
         )
+
+    @bot.tree.command(name="itemspawn")
+
+    @app_commands.describe(
+        member="(ADMIN) Spawn an item on a room."
+    )
+
+    @app_commands.autocomplete(
+        item=item_autocomplete
+        room=room_autocomplete
+    )
+    
+    async def itemspawn(
+        interaction: discord.Interaction,
+        item: str,
+        room: str
+    ):
+        
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
+        
+        room_items[room].append({
+            "id": item
+        })
+
+        await interaction.response.send_message(
+            f"Spawned **{ITEMS[item]['name']}** in room {room}.",
+            ephemeral=True
+        )
+
+        return
