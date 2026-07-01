@@ -50,7 +50,7 @@ ITEMS = {
             "Friendly note that La Siréne left you with when boarding."
         ),
 
-        "text": "vro ong you aint coming back, believe me, youre so dead its not even funny. jk it is get rekt bozo.",
+        "text": "Welcome to TLVOTHE, thank you for testing the game in its closed alpha stage.\nYou have manny different commands at your disposal, which you can see with the /game_commands command.\nPlease report any inconcistencies, bugs, whatever, and thank you once more for testing the game",
 
         "usable": True,
 
