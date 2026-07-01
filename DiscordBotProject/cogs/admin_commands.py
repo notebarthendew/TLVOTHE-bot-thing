@@ -355,7 +355,7 @@ def setup_commands(bot):
     @bot.tree.command(name="itemspawn")
 
     @app_commands.describe(
-        member="(ADMIN) Spawn an item on a room."
+        item="(ADMIN) Spawn an item on a room."
     )
 
     @app_commands.autocomplete(
