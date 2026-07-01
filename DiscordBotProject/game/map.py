@@ -19,9 +19,9 @@ ROOMS = {
         "front": None,
         "back": "2",
         "look_descriptions": [
-            "This the description for room onem, wowz.",
-            "im going clinically insane also this is the desc for room 1.",
-            "as you already know this is room one :3."
+            "This the description for room one.",
+            "This is another description for room one",
+            "This is yet another description for room one."
         ]
     },
 
@@ -31,9 +31,9 @@ ROOMS = {
         "front": "1",
         "back": "3",
         "look_descriptions": [
-            "Room 2: electric boogaloo.",
-            "fuck",
-            "can a butterflies' flap really birth a hurricane?."
+            "This the description for room two.",
+            "This is another description for room two",
+            "This is yet another description for room two."
         ]
     },
 
@@ -43,9 +43,9 @@ ROOMS = {
         "front": "2",
         "back": "4",
         "look_descriptions": [
-            "the.. is 3 enough for a saga?",
-            "hoy me comi una salchipapa",
-            "as you already know this is room 3 :**3**."
+            "This the description for room three.",
+            "This is another description for room three",
+            "This is yet another description for room three."
         ]
     },
 
@@ -55,9 +55,9 @@ ROOMS = {
         "front": "3",
         "back": "5",
         "look_descriptions": [
-            "murder",
-            "there a mountains of dead dummies here",
-            "i wuw murdur."
+            "This the description for room four.",
+            "This is another description for room four",
+            "This is yet another description for room four."
         ]
     },
 
@@ -67,9 +67,9 @@ ROOMS = {
         "front": "4",
         "back": "6",
         "look_descriptions": [
-            "nothing much happens here excpet for room 6 stuff",
-            "guh",
-            "i wish more people notices this server"
+            "This the description for room five.",
+            "This is another description for room five",
+            "This is yet another description for room five."
         ]
     },
 
