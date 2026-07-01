@@ -220,7 +220,8 @@ def setup_commands(bot):
             items_section = (
                 f"Items here:\n"
                 f"{items_text}\n\n"
-        
+            )
+            
         else:
             items_section = ""
         
