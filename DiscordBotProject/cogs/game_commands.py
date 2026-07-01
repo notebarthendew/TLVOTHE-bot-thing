@@ -11,6 +11,7 @@ from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
 from utils.helpers import check_player_status
 from game.map import ROOMS
+from game.room_items import room_items
 
 
 def setup_commands(bot):
@@ -167,6 +168,8 @@ def setup_commands(bot):
         people_in_room = []
         corpses_in_room = []
 
+        items_in_room = room_items[current_room]
+
         for player_id, player_data in players.items():
 
             if player_id == user_id:
@@ -206,6 +209,20 @@ def setup_commands(bot):
             )
         else:
             corpse_section = ""
+
+        if items_in_room:
+
+            items_text = "\n".join(
+                f"- {ITEMS[item]['name']}"
+                for item in items_in_room
+            )
+
+            items_section = (
+                f"Items here:\n"
+                f"{items_text}\n\n"
+        
+        else:
+            items_section = ""
         
         exits = []
 
@@ -241,6 +258,7 @@ def setup_commands(bot):
             f"{description}\n\n"
             f"People here:\n{people_text}\n\n"
             f"{corpse_section}"
+            f"{items_section}"
             f"Exits:\n{exits_text}",
             ephemeral=True
         )
