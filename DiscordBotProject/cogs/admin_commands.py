@@ -359,7 +359,7 @@ def setup_commands(bot):
     )
 
     @app_commands.autocomplete(
-        item=item_autocomplete
+        item=item_autocomplete,
         room=room_autocomplete
     )
     
