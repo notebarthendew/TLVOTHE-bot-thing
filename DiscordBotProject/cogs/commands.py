@@ -22,6 +22,7 @@ def setup_commands(bot):
     await interaction.response.send_message(" # TVLOTHE BOT COMMANDS\n"
                                             "## Slash Commands\n"
                                             "* '/ping' Send pong.\n"
+                                            "* '/d20roll' Roll a dice of 20 sides.\n"
                                             "## Prefix Commands\n"
                                             "* '?hello' Say hi and ping the caller\n",
                                             "* '?reply' Send a discord reply to the caller\n"
@@ -37,8 +38,8 @@ def setup_commands(bot):
                                             "## Actions\n"
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
                                             "* '/look' Get information about the room you are currently in.\n"
-                                            "* '/inventory' Look into the item you have in your inventory.\n"
-                                            "* '/kill' Kill a player. This is a debug command to test the dead people system.\n"
+                                            "* '/inventory' Look into the items you have in your inventory.\n"
+                                            "* '/use' Use any item inside of your inventory.\n"
                                             "*This will be regularly updated until all planned actions are implemented.*",
                                             ephimeral=True
                                             )
