@@ -284,7 +284,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    @bot.tree.command(name="inventory")
+    @bot.tree.command(name="inventory",description="Check your inventory.")
     async def inventory(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
@@ -310,7 +310,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    @bot.tree.command(name="use")
+    @bot.tree.command(name="use",description="Use an item from your inventory.")
 
     @app_commands.autocomplete(
         item=inventory_item_autocomplete
