@@ -33,6 +33,26 @@ def setup_commands(bot):
             for item in players[user_id]["inventory"]
             if current.lower() in item.lower()
         ][:25]
+
+    async def room_item_autocomplete(interaction, current: str):
+        user_id = str(interaction.user.id)
+        
+        if user_id not in players:
+            return []
+
+        current_room = players[user_id]["room"]
+        items_in_room = room_items[current_room]
+        
+        return [
+            app_commands.Choice(
+                name=ITEMS[item]["name"],
+                value=item
+            )
+            for item in items_in_room
+            if current.lower() in ITEMS[item]["name"].lower()
+            or current.lower() in item.lower()
+        ][:25]
+        
     
     @bot.tree.command(
     name="move",
@@ -457,6 +477,73 @@ def setup_commands(bot):
             players[user_id]["inventory"].remove(item)
 
             save_players()
+
+    @bot.tree.command(
+    name="take", 
+    description="Pick up an item from the room you are in."
+    )
+
+    @app_commands.autocomplete(
+        item=room_item_autocomplete
+    )
+
+    async def take(
+        interaction: discord.Interaction,
+        item: str,
+    ):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        allowed_channel_id = ROOMS[current_room]["command_channel_id"]
+        
+        allowed_channel = interaction.guild.get_channel(
+                allowed_channel_id
+            
+        
+        if interaction.channel.id != allowed_channel_id:
+
+            await interaction.response.send_message(
+                f"You can only do that from room {current_room}.",
+                ephemeral=True
+            )
+
+            return
+        
+        if item not in ITEMS:
+            await interaction.response.send_message(
+                "That doesn't exist.",
+                ephemeral=True
+            )
+            return
+
+        if item not in room_items[current_room]:
+            await interaction.response.send_message(
+                "That item isn't here.",
+                ephemeral=True
+            )
+            return
+        
+        current_room = players[user_id]["room"]
+        
+        room_items[current_room].remove(item)
+        players[user_id]["inventory"].append(item)
+
+        user_nickname = players[user_id]["nickname"]
+        
+        await interaction.response.send_message(
+            f"You picked up **{ITEMS[item]['name']}**.",
+            ephemeral=True
+        )
+
+
+        await allowed_channel.send(
+            f"{user_nickname} picked up a **{ITEMS[item]['name']}** from the ground."
+        )
     
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
@@ -472,7 +559,7 @@ def setup_commands(bot):
         await interaction.response.send_message(
             players[user_id]["room"],
             ephemeral=True
-    )
+        )
 
 # h
 
