@@ -52,6 +52,24 @@ def setup_commands(bot):
             if current.lower() in ITEMS[item["id"]]["name"].lower()
             or current.lower() in item["id"].lower()
         ][:25]
+
+    async def room_player_autocomplete(interaction, current: str):
+        user_id = str(interaction.user.id)
+        
+        if user_id not in players:
+            return []
+
+        current_room = players[user_id]["room"]
+        
+        return [
+            app_commands.Choice(
+                name=players[pid]["nickname"],
+                value=pid
+            )
+            for pid, pdata in players.items()
+            if pid != user_id and pdata["room"] == current_room
+            and current.lower() in pdata["nickname"].lower()
+        ][:25]
         
     
     @bot.tree.command(
@@ -313,13 +331,14 @@ def setup_commands(bot):
     @bot.tree.command(name="use",description="Use an item from your inventory.")
 
     @app_commands.autocomplete(
-        item=inventory_item_autocomplete
+        item=inventory_item_autocomplete,
+        target=room_player_autocomplete
     )
 
     async def use(
         interaction: discord.Interaction,
         item: str,
-        target: discord.Member = None
+        target: str = None
     ):
 
         user_id = str(interaction.user.id)
@@ -399,7 +418,7 @@ def setup_commands(bot):
 
                 return
 
-            target_id = str(target.id)
+            target_id = target
             
             if target_id not in players:
 
@@ -412,15 +431,6 @@ def setup_commands(bot):
 
             target_nickname = players[target_id]["nickname"]
             user_nickname = players[user_id]["nickname"]
-            
-            if players[target_id]["room"] != players[user_id]["room"]:
-
-                await interaction.response.send_message(
-                    "They are not in this room.",
-                    ephemeral=True
-                )
-
-                return
 
             if not players[target_id]["alive"]:
 
@@ -443,8 +453,11 @@ def setup_commands(bot):
                 dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
                 game_role = interaction.guild.get_role(GAME_ROLE_ID)
 
-                await target.remove_roles(game_role)
-                await target.add_roles(dead_role)
+                # Get the Discord member to update roles
+                target_member = interaction.guild.get_member(int(target_id))
+                if target_member:
+                    await target_member.remove_roles(game_role)
+                    await target_member.add_roles(dead_role)
                 
                 save_players()
 
@@ -554,13 +567,14 @@ def setup_commands(bot):
     )
 
     @app_commands.autocomplete(
-        item=inventory_item_autocomplete
+        item=inventory_item_autocomplete,
+        target=room_player_autocomplete
     )
 
     async def give(
         interaction: discord.Interaction,
         item: str,
-        target: discord.Member
+        target: str
     ):
 
         user_id = str(interaction.user.id)
@@ -595,18 +609,11 @@ def setup_commands(bot):
             )
             return
 
-        target_id = str(target.id)
+        target_id = target
         
         if target_id not in players:
             await interaction.response.send_message(
                 "That player is not in the game.",
-                ephemeral=True
-            )
-            return
-
-        if players[target_id]["room"] != current_room:
-            await interaction.response.send_message(
-                "They are not in this room.",
                 ephemeral=True
             )
             return
@@ -649,5 +656,4 @@ def setup_commands(bot):
         )
 
 # h
-
 
