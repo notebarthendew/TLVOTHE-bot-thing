@@ -213,7 +213,7 @@ def setup_commands(bot):
         if items_in_room:
 
             items_text = "\n".join(
-                f"- {ITEMS[item]['name']}"
+                f"- {ITEMS[item['id']]['name']}"
                 for item in items_in_room
             )
 
@@ -475,3 +475,4 @@ def setup_commands(bot):
     )
 
 # h
+
