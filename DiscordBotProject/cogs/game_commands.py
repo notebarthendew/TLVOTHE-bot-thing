@@ -503,7 +503,7 @@ def setup_commands(bot):
         
         allowed_channel = interaction.guild.get_channel(
                 allowed_channel_id
-            
+        )
         
         if interaction.channel.id != allowed_channel_id:
 
