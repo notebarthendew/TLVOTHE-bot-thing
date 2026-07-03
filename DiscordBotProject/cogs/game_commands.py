@@ -547,6 +547,90 @@ def setup_commands(bot):
         await allowed_channel.send(
             f"{user_nickname} picked up a **{ITEMS[item]['name']}** from the ground."
         )
+
+    @bot.tree.command(
+    name="give",
+    description="Give an item from your inventory to another player."
+    )
+
+    @app_commands.autocomplete(
+        item=inventory_item_autocomplete
+    )
+
+    async def give(
+        interaction: discord.Interaction,
+        item: str,
+        target: discord.Member
+    ):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        current_room = players[user_id]["room"]
+        
+        allowed_channel_id = ROOMS[current_room]["command_channel_id"]
+        
+        if interaction.channel.id != allowed_channel_id:
+            await interaction.response.send_message(
+                f"You can only do that from room {current_room}.",
+                ephemeral=True
+            )
+            return
+        
+        if item not in players[user_id]["inventory"]:
+            await interaction.response.send_message(
+                "You don't have that item.",
+                ephemeral=True
+            )
+            return
+
+        if item not in ITEMS:
+            await interaction.response.send_message(
+                "That item no longer exists.",
+                ephemeral=True
+            )
+            return
+
+        target_id = str(target.id)
+        
+        if target_id not in players:
+            await interaction.response.send_message(
+                "That player is not in the game.",
+                ephemeral=True
+            )
+            return
+
+        if players[target_id]["room"] != current_room:
+            await interaction.response.send_message(
+                "They are not in this room.",
+                ephemeral=True
+            )
+            return
+
+        if not players[target_id]["alive"]:
+            await interaction.response.send_message(
+                "That player is dead.",
+                ephemeral=True
+            )
+            return
+
+        # Transfer the item
+        players[user_id]["inventory"].remove(item)
+        players[target_id]["inventory"].append(item)
+        save_players()
+
+        user_nickname = players[user_id]["nickname"]
+        target_nickname = players[target_id]["nickname"]
+        item_name = ITEMS[item]["name"]
+        
+        await interaction.response.send_message(
+            f"You gave **{item_name}** to {target_nickname}.",
+            ephemeral=True
+        )
     
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
@@ -565,4 +649,5 @@ def setup_commands(bot):
         )
 
 # h
+
 
