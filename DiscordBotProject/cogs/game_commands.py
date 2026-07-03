@@ -45,12 +45,12 @@ def setup_commands(bot):
         
         return [
             app_commands.Choice(
-                name=ITEMS[item]["name"],
-                value=item
+                name=ITEMS[item["id"]]["name"],
+                value=item["id"]
             )
             for item in items_in_room
-            if current.lower() in ITEMS[item]["name"].lower()
-            or current.lower() in item.lower()
+            if current.lower() in ITEMS[item["id"]]["name"].lower()
+            or current.lower() in item["id"].lower()
         ][:25]
         
     
@@ -499,6 +499,8 @@ def setup_commands(bot):
             await interaction.response.send_message(error, ephemeral=True)
             return
 
+        current_room = players[user_id]["room"]
+        
         allowed_channel_id = ROOMS[current_room]["command_channel_id"]
         
         allowed_channel = interaction.guild.get_channel(
@@ -521,16 +523,17 @@ def setup_commands(bot):
             )
             return
 
-        if item not in room_items[current_room]:
+        # Check if item is in the room (items are dicts with "id" key)
+        item_in_room = any(i["id"] == item for i in room_items[current_room])
+        if not item_in_room:
             await interaction.response.send_message(
                 "That item isn't here.",
                 ephemeral=True
             )
             return
         
-        current_room = players[user_id]["room"]
-        
-        room_items[current_room].remove(item)
+        # Remove the item dict from room_items
+        room_items[current_room] = [i for i in room_items[current_room] if i["id"] != item]
         players[user_id]["inventory"].append(item)
 
         user_nickname = players[user_id]["nickname"]
