@@ -46,6 +46,37 @@ def setup_commands(bot):
             )
             
         ][:25]
+
+    async def player_nickname_autocomplete(
+        interaction,
+        current: str
+    ):
+        return [
+            app_commands.Choice(
+                name=pdata["nickname"],
+                value=pid
+            )
+            for pid, pdata in players.items()
+            if current.lower() in pdata["nickname"].lower()
+        ][:25]
+
+    async def room_player_autocomplete(interaction, current: str):
+        user_id = str(interaction.user.id)
+        
+        if user_id not in players:
+            return []
+
+        current_room = players[user_id]["room"]
+        
+        return [
+            app_commands.Choice(
+                name=players[pid]["nickname"],
+                value=pid
+            )
+            for pid, pdata in players.items()
+            if pid != user_id and pdata["room"] == current_room
+            and current.lower() in pdata["nickname"].lower()
+        ][:25]
     
     @bot.tree.command(
         name="add",
@@ -219,16 +250,17 @@ def setup_commands(bot):
     @bot.tree.command(name="itemgive")
 
     @app_commands.describe(
-        member="(ADMIN) Give a player an item."
+        target="The player to give the item to"
     )
 
     @app_commands.autocomplete(
-        item=item_autocomplete
+        item=item_autocomplete,
+        target=player_nickname_autocomplete
     )
     
     async def itemgive(
         interaction: discord.Interaction,
-        member: discord.Member,
+        target: str,
         item: str
     ):
 
@@ -248,12 +280,12 @@ def setup_commands(bot):
 
             return
 
-        user_id = str(member.id)
+        user_id = target
 
         if user_id not in players:
 
             await interaction.response.send_message(
-                f"{member.mention} is not in the game..",
+                f"That player is not in the game.",
                 ephemeral=True
             )
 
@@ -272,8 +304,9 @@ def setup_commands(bot):
 
         players[user_id]["inventory"].append(item)
 
+        target_nickname = players[user_id]["nickname"]
         await interaction.response.send_message(
-            f"Gave **{ITEMS[item]['name']}** to {member.mention}.",
+            f"Gave **{ITEMS[item]['name']}** to {target_nickname}.",
             ephemeral=True
         )
 
@@ -282,9 +315,12 @@ def setup_commands(bot):
     description="(ADMIN) Kill a player"
     )
     @app_commands.describe(target="The player to kill")
+    @app_commands.autocomplete(
+        target=player_nickname_autocomplete
+    )
     async def kill(
         interaction: discord.Interaction,
-        target: discord.Member
+        target: str
     ):
 
         has_admin_role = any(
@@ -301,33 +337,15 @@ def setup_commands(bot):
 
             return
         
-        user_id = str(interaction.user.id)
-        target_id = str(target.id)
+        target_id = target
 
-        error = check_player_status(user_id)
-        if error:
-            await interaction.response.send_message(error, ephemeral=True)
-            return
-
-        error = check_player_status(target_id)
-        if error:
-            await interaction.response.send_message(error, ephemeral=True)
-            return
-
-        allowed_channel_id = ROOMS[current_room]["command_channel_id"]
-
-        if interaction.channel.id != allowed_channel_id:
+        if target_id not in players:
 
             await interaction.response.send_message(
-            f"You can only do that from the room you're currently in. (Use the command in the {current_room} channel)",
-            ephemeral=True
-        )
-        
-        if players[user_id]["room"] != players[target_id]["room"]:
-            await interaction.response.send_message(
-                 "That player is not in the same room as you.",
+                "That player is not in the game.",
                 ephemeral=True
             )
+
             return
 
         players[target_id]["alive"] = False
@@ -336,17 +354,20 @@ def setup_commands(bot):
         dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
         game_role = interaction.guild.get_role(GAME_ROLE_ID)
 
-        await target.remove_roles(game_role)
-        await target.add_roles(dead_role)
+        # Get the Discord member to update roles
+        target_member = interaction.guild.get_member(int(target_id))
+        if target_member:
+            await target_member.remove_roles(game_role)
+            await target_member.add_roles(dead_role)
 
         target_nickname = players[target_id]["nickname"]
-        killer_nickname = players[user_id]["nickname"]
 
-        current_room = players[user_id]["room"]
+        current_room = players[target_id]["room"]
         room_channel = interaction.guild.get_channel(ROOMS[current_room]["channel_id"])
 
         await interaction.response.send_message(
-            f"*{killer_nickname} came from above, as {target_nickname} looked up at them, {killer_nickname} snaps their fingers, and {target_nickname} collapses to the floor.*"
+            f"*{target_nickname} has been killed.*",
+            ephemeral=True
         )
         await room_channel.send(
             f"*{target_nickname} has died.*"
@@ -383,6 +404,24 @@ def setup_commands(bot):
 
             return
         
+        if room not in ROOMS:
+
+            await interaction.response.send_message(
+                "That room does not exist.",
+                ephemeral=True
+            )
+
+            return
+
+        if item not in ITEMS:
+
+            await interaction.response.send_message(
+                "That item does not exist.",
+                ephemeral=True
+            )
+
+            return
+        
         room_items[room].append({
             "id": item
         })
@@ -393,3 +432,4 @@ def setup_commands(bot):
         )
 
         return
+
