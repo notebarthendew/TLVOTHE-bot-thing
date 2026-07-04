@@ -20,23 +20,23 @@ ITEMS = {
 
         "kill_messages": [
 
-            "{user} plunged the knife into {target}.",
+            "<:KnifeAction:1448502320261496852> {user} plunged the knife into {target}.",
 
-            "{target} was stabbed to death by {user}.",
+            "<:KnifeAction:1448502320261496852> {target} was stabbed to death by {user}.",
 
-            "{user} buried the knife into {target}'s chest.",
+            "<:KnifeAction:1448502320261496852> {user} buried the knife into {target}'s chest.",
 
-            "{target} never saw the blade coming.",
+            "<:KnifeAction:1448502320261496852> {target} never saw the blade coming.",
 
         ],
 
         "self_kill_messages": [
 
-            "{user} stabbed themselves. (what a way to go out vro)",
+            "<:KnifeAction:1448502320261496852> {user} stabbed themselves. (what a way to go out vro)",
 
-            "{user} somehow managed to lose a fight against their own knife.",
+            "<:KnifeAction:1448502320261496852> {user} somehow managed to lose a fight against their own knife.",
 
-            "{user} decided life wasn't worth it anymore."
+            "<:KnifeAction:1448502320261496852> {user} decided life wasn't worth it anymore."
 
         ]
 
@@ -50,7 +50,7 @@ ITEMS = {
             "Friendly note that La Siréne left you with when boarding."
         ),
 
-        "text": "Welcome to TLVOTHE, thank you for testing the game in its closed alpha stage.\nYou have manny different commands at your disposal, which you can see with the /game_commands command.\nPlease report any inconcistencies, bugs, whatever, and thank you once more for testing the game",
+        "text": "<:NoteAction:1522803643881885858>\nWelcome to TLVOTHE, thank you for testing the game in its closed alpha stage.\nYou have manny different commands at your disposal, which you can see with the /game_commands command.\nPlease report any inconcistencies, bugs, whatever, and thank you once more for testing the game",
 
         "usable": True,
 
