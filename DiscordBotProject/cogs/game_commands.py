@@ -536,7 +536,6 @@ def setup_commands(bot):
             )
             return
 
-        # Check if item is in the room (items are dicts with "id" key)
         item_in_room = any(i["id"] == item for i in room_items[current_room])
         if not item_in_room:
             await interaction.response.send_message(
@@ -545,7 +544,6 @@ def setup_commands(bot):
             )
             return
         
-        # Remove the item dict from room_items
         room_items[current_room] = [i for i in room_items[current_room] if i["id"] != item]
         players[user_id]["inventory"].append(item)
 
@@ -625,7 +623,6 @@ def setup_commands(bot):
             )
             return
 
-        # Transfer the item
         players[user_id]["inventory"].remove(item)
         players[target_id]["inventory"].append(item)
         save_players()
@@ -638,6 +635,51 @@ def setup_commands(bot):
             f"You gave **{item_name}** to {target_nickname}.",
             ephemeral=True
         )
+
+    @bot.tree.command(
+    name="inspect",
+    description="Read the description of an item in your inventory."
+    )
+
+    @app_commands.autocomplete(
+        item=inventory_item_autocomplete,
+    )
+
+    async def inspect(
+        interaction: discord.Interaction,
+        item: str,
+    ):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        if item not in ITEMS:
+            await interaction.response.send_message(
+                "That item doesn't exist.",
+                ephemeral=True
+            )
+            return
+        
+        if item not in players[user_id]["inventory"]:
+            await interaction.response.send_message(
+                "You don't have that item.",
+                ephemeral=True
+            )
+            return
+
+        message = (
+            f"## {ITEMS[item]['name']}\n\n"
+            f"{ITEMS[item]['description']}"
+        )
+
+        if "text" in ITEMS[item]:
+            message += f"\n\n---\n{ITEMS[item]['text']}"
+
+        await interaction.response.send_message(message, ephemeral=True)
     
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
