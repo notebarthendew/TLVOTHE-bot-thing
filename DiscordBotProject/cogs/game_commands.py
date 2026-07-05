@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 from discord import app_commands
 import discord
@@ -250,9 +251,12 @@ def setup_commands(bot):
 
         if items_in_room:
 
+            item_counts = Counter(items_in_room)
+            
             items_text = "\n".join(
-                f"- {ITEMS[item['id']]['name']}"
-                for item in items_in_room
+                f"- {ITEMS[item]['name']}"
+                + (f" x{count}" if count > 1 else "")
+                for item, count in item_counts.items()
             )
 
             items_section = (
@@ -315,9 +319,12 @@ def setup_commands(bot):
         player_inventory = players[user_id]["inventory"]
         
         if player_inventory:
+            item_counts = Counter(player_inventory)
+
             inventory_text = "\n".join(
                 f"- {ITEMS[item]['name']}"
-                for item in player_inventory
+                + (f" x{count}" if count > 1 else "")
+                for item, count in item_counts.items()
             )
         else:
             inventory_text = "- Nothing (So much for a high-profile character, smh)"
