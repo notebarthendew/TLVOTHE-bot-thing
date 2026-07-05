@@ -306,7 +306,7 @@ def setup_commands(bot):
 
         target_nickname = players[user_id]["nickname"]
         await interaction.response.send_message(
-            f"Gave **{ITEMS[item]['name']}** to {target_nickname}.",
+            f"Gave **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** to {target_nickname}.",
             ephemeral=True
         )
 
@@ -427,7 +427,7 @@ def setup_commands(bot):
         })
 
         await interaction.response.send_message(
-            f"Spawned **{ITEMS[item]['name']}** in room {room}.",
+            f"Spawned **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** in room {room}.",
             ephemeral=True
         )
 
