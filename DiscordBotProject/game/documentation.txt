@@ -7,6 +7,8 @@ Players move between cabins, do tasks, investigate crimes, interact with other p
 
 This game is heavily reliant on players' attention, communication, and roleplay between each other.
 
+TLVOTHE is designed as a long-form social deduction game. While the bot manages movement, inventories, items, and other mechanics, the players themselves drive the story through roleplay, investigation, alliances, and deception.
+
 ----- CORE GAMEPLAY -----
 
   At the start of the game, the players are placed aboard the train, each given a key to enter their own cabin rooms and a hidden role.
@@ -43,6 +45,7 @@ When a player moves:
 
 Players cannot scroll through previous room history, preventing
 metagaming and preserving immersion.
+Rooms may naturally contain items that players can discover and collect.
 
 ----- MOVEMENT SYSTEM -----
 
@@ -104,17 +107,28 @@ The death system works as of the latest update of this documentation, also the c
 
 ----- ITEM SYSTEM ----
 
-Players possess their own inventories and can inspect them using /inventory.
-
-Items are used with the /use command. Some items may require a target, while others can simply be read or activated.
-
-Future updates will allow players to pick up, trade, and discover items naturally throughout the train.
+Players each have their own inventory. Items can be found throughout the train, picked up with /take, given to other players with /give, inspected with /inspect, and used through /use. Some items require a target, while others simply display information or perform an action.
+Items contain descriptions, lore, or readable text that players may access with /inspect.
+Items may be secretly handed to other players, allowing for deception, cooperation, or attempts to frame others.
 
 ----- MOOD SYSTEM -----
 
 alr vro imma be honest this has bambozleed me for a while now, i cant think on a punishment for when you dont
 do your tasks, consider this as wip for now
 
+----- MATCH LENGTH -----
+
+A typical season of TLVOTHE is designed to last
+between one and two months depending on player
+activity.
+
+Because of this, information, alliances, murders,
+and evidence accumulate over long periods of time,
+creating an evolving story rather than a short
+party game.
+
+A standard season is designed around
+24 players.
 
 ----- COMMANDS -----
 
@@ -129,8 +143,17 @@ Travel between connected train cars.
 /inventory
 View the items you're carrying.
 
+/inspect
+Read the description of your item.
+
 /use
 Use an item from your inventory.
+
+/give
+Give another player an item from your inventory.
+
+/take
+Take an item from the room.
 
 /add
 (Admin) Add a player to the game.
@@ -141,20 +164,24 @@ Use an item from your inventory.
 /itemgive
 (Admin) Give an item to a player.
 
+/itemspawn
+(Admin) Spawn an item in a room.
+
 /kill
 (Admin) Instantly kill a player.
 
 
 ----- CURRENT DEVELOPMENT -----
 
-Focusing on: /use command, along with inventory stuff
+Focusing on: World building, items, and role implementation.
 
 Current implemented/planned systems:
 [+] Full room movement
 [+] Channel visibility system
-[+] Expanded train map
 [+] Administrative tools
 [+] Inventory system
+[+] Basic item system
+[ ] Final train map
 [ ] Role assignment
 [ ] Evidence system
 [ ] Sound propagation
