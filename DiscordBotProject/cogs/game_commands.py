@@ -254,7 +254,7 @@ def setup_commands(bot):
             item_counts = Counter(items_in_room)
             
             items_text = "\n".join(
-                f"- {ITEMS[item]['name']}"
+                f"- {ITEMS[item]['name']} ({ITEMS[item]['emoji']})"
                 + (f" x{count}" if count > 1 else "")
                 for item, count in item_counts.items()
             )
@@ -322,7 +322,7 @@ def setup_commands(bot):
             item_counts = Counter(player_inventory)
 
             inventory_text = "\n".join(
-                f"- {ITEMS[item]['name']}"
+                f"- {ITEMS[item]['name']} ({ITEMS[item]['emoji']})"
                 + (f" x{count}" if count > 1 else "")
                 for item, count in item_counts.items()
             )
@@ -557,13 +557,13 @@ def setup_commands(bot):
         user_nickname = players[user_id]["nickname"]
         
         await interaction.response.send_message(
-            f"You picked up **{ITEMS[item]['name']}**.",
+            f"You picked up **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})**.",
             ephemeral=True
         )
 
 
         await allowed_channel.send(
-            f"{user_nickname} picked up a **{ITEMS[item]['name']}** from the ground."
+            f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
         )
 
     @bot.tree.command(
@@ -639,7 +639,7 @@ def setup_commands(bot):
         item_name = ITEMS[item]["name"]
         
         await interaction.response.send_message(
-            f"You gave **{item_name}** to {target_nickname}.",
+            f"You gave **{item_name} ({ITEMS[item]['emoji']})** to {target_nickname}.",
             ephemeral=True
         )
 
@@ -679,7 +679,7 @@ def setup_commands(bot):
             return
 
         message = (
-            f"## {ITEMS[item]['name']}\n\n"
+            f"## {ITEMS[item]['name']} ({ITEMS[item]['emoji']})\n\n"
             f"{ITEMS[item]['description']}"
         )
 
