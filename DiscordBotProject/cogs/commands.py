@@ -24,11 +24,11 @@ def setup_commands(bot):
                                             "* '/ping' Send pong.\n"
                                             "* '/d20roll' Roll a dice of 20 sides.\n"
                                             "## Prefix Commands\n"
-                                            "* '?hello' Say hi and ping the caller\n",
+                                            "* '?hello' Say hi and ping the caller\n"
                                             "* '?reply' Send a discord reply to the caller\n"
                                             "* '?cheese' Send a cheese gif (not random)\n"
                                             "* '?revolver' Send a Revolver (<:Revolver:1505709394057494659>) emoji",
-                                            ephimeral=True
+                                            ephemeral=True
                                             )
 
   @bot.tree.command(name="game_commands")
@@ -44,7 +44,7 @@ def setup_commands(bot):
                                             "* '/give' Silently give an item to another person.\n"
                                             "* '/take' Take an item from the current room.\n"
                                             "*This will be regularly updated until all planned actions are implemented.*",
-                                            ephimeral=True
+                                            ephemeral=True
                                             )
     
 
