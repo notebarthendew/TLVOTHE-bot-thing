@@ -251,7 +251,7 @@ def setup_commands(bot):
 
         if items_in_room:
 
-            item_counts = Counter(items_in_room)
+            item_counts = Counter(item["id"] for item in items_in_room)
             
             items_text = "\n".join(
                 f"- {ITEMS[item]['name']} ({ITEMS[item]['emoji']})"
