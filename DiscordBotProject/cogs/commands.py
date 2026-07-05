@@ -39,7 +39,10 @@ def setup_commands(bot):
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
                                             "* '/look' Get information about the room you are currently in.\n"
                                             "* '/inventory' Look into the items you have in your inventory.\n"
+                                            "* '/inspect' Look into the items you have in your inventory.\n"
                                             "* '/use' Use any item inside of your inventory.\n"
+                                            "* '/give' Silently give an item to another person.\n"
+                                            "* '/take' Take an item from the current room.\n"
                                             "*This will be regularly updated until all planned actions are implemented.*",
                                             ephimeral=True
                                             )
