@@ -2,8 +2,10 @@ ITEMS = {
 
     "knife": {
 
-        "name": "Knife (<:Knife:1448502216796147842>)",
+        "name": "Knife",
 
+        "emoji": "<:Knife:1448502216796147842>",
+        
         "description": (
             "A sharp kitchen knife."
         ),
@@ -44,8 +46,10 @@ ITEMS = {
 
     "sirenenote": {
 
-        "name": "Note (<:Note:1522803594313601114>)",
+        "name": "Note",
 
+        "emoji": "<:Note:1522803594313601114>",
+        
         "description": (
             "Friendly note that La Siréne left you with when boarding."
         ),
