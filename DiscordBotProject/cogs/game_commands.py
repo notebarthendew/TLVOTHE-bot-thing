@@ -448,9 +448,6 @@ def setup_commands(bot):
 
                 return
 
-            allowed_channel = interaction.guild.get_channel(
-                allowed_channel_id
-            )
             action = item_data["action"]
             
             if action == "kill":
@@ -478,12 +475,15 @@ def setup_commands(bot):
                 else:
                     message = random.choice(item_data["kill_messages"])
 
-                await allowed_channel.send(
-                    message.format(
-                        user=user_nickname,
-                        target=target_nickname
+                # Get the channel and send the message if it exists
+                allowed_channel = interaction.guild.get_channel(allowed_channel_id)
+                if allowed_channel:
+                    await allowed_channel.send(
+                        message.format(
+                            user=user_nickname,
+                            target=target_nickname
+                        )
                     )
-                )
         
         if target_type == "none":
         
@@ -562,9 +562,10 @@ def setup_commands(bot):
         )
 
 
-        await allowed_channel.send(
-            f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
-        )
+        if allowed_channel:
+            await allowed_channel.send(
+                f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
+            )
 
     @bot.tree.command(
     name="give",
@@ -705,4 +706,5 @@ def setup_commands(bot):
         )
 
 # h
+
 
