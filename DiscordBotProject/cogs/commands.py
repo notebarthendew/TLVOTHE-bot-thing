@@ -34,7 +34,7 @@ def setup_commands(bot):
   @bot.tree.command(name="game_commands")
   async def game_commands(interaction: discord.Interaction):
     await interaction.response.send_message(" # TVLOTHE BOT *GAME* COMMANDS\n"
-                                            "*You are able to use these commands if you are in the game.*"
+                                            "*You are able to use these commands if you are in the game.*\n"
                                             "## Actions\n"
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"
                                             "* '/look' Get information about the room you are currently in.\n"
