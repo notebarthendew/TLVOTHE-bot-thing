@@ -243,8 +243,8 @@ def setup_commands(bot):
                 for corpse in corpses_in_room
             )
             corpse_section = (
-                f"Corpses here:\n"
-                f"{corpses_text}\n\n"
+                f"### Corpses here:\n"
+                f"*{corpses_text}*\n\n"
             )
         else:
             corpse_section = ""
@@ -260,7 +260,7 @@ def setup_commands(bot):
             )
 
             items_section = (
-                f"Items here:\n"
+                f"### Items here:\n"
                 f"{items_text}\n\n"
             )
             
@@ -301,7 +301,7 @@ def setup_commands(bot):
             "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n"
             f"{description}\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n\n"
             f"People here:\n{people_text}\n\n"
-            f"**{corpse_section}**"
+            f"{corpse_section}"
             f"{items_section}"
             f"Exits:\n{exits_text}",
             ephemeral=True
