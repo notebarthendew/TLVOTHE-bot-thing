@@ -297,10 +297,11 @@ def setup_commands(bot):
         look_message = random.choice(look_messages)
         
         await interaction.response.send_message(
-            f"{look_message}\n"
-            f"{description}\n\n"
+            f"## {look_message}\n"
+            "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-"
+            f"{description}\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n\n"
             f"People here:\n{people_text}\n\n"
-            f"{corpse_section}"
+            f"**{corpse_section}**"
             f"{items_section}"
             f"Exits:\n{exits_text}",
             ephemeral=True
