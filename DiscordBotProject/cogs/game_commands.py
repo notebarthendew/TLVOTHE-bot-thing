@@ -298,7 +298,7 @@ def setup_commands(bot):
         
         await interaction.response.send_message(
             f"## {look_message}\n"
-            "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-"
+            "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n"
             f"{description}\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n\n"
             f"People here:\n{people_text}\n\n"
             f"**{corpse_section}**"
