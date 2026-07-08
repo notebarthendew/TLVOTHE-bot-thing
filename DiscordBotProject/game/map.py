@@ -69,8 +69,8 @@ ROOMS = {
     },
 
     "dining_room": {
-        "channel_id": ROOM2_ID,
-        "command_channel_id": ROOM2_ID,
+        "channel_id": DINING_ID,
+        "command_channel_id": DINING_ID,
         "front": "front",
         "back": "kitchen",
         "look_descriptions": [
