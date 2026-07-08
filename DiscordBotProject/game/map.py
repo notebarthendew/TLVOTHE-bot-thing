@@ -106,7 +106,7 @@ ROOMS = {
 
     "luggage_room": {
         "channel_id": LUGGAGE_ID,
-        "command_channel_id": LUGAGGE_ID,
+        "command_channel_id": LUGGAGE_ID,
         "front": "front_dorm",
         "back": "library",
         "look_descriptions": [
@@ -180,11 +180,47 @@ ROOMS = {
         "channel_id": BATHROOM_ID,
         "command_channel_id": BATHROOM_ID,
         "front": "storage",
-        "back": "storage",
+        "back": "back_dorm",
         "look_descriptions": [
-            "Full of random supplies that may be useful or completely useless.",
-            "Boxes and equipment fill the room. Nobody remembers putting half of this stuff here.",
-            "A cramped storage area containing everything the train needs. And probably a few things it doesn't."
+            "Somehow the only place where people expect privacy, despite being on a train full of detectives and murder suspects.",
+            "A small bathroom area. Clean enough to use, suspicious enough to avoid staying too long.",
+            "A peaceful place to think, panic, or wonder why someone left a note on the mirror."
+        ]
+    },  
+
+    "back_dorm": {
+        "channel_id": BACK_DORM_ID,
+        "command_channel_id": BACK_DORM_THREAD_ID,
+        "front": "bathroom",
+        "back": "engine_room",
+        "look_descriptions": [
+            "The passenger cabins near the back of the train. Far away from the cockpit, but somehow much closer to trouble.",
+            "Quiet, isolated, and the perfect location for someone who wants to avoid attention... or attract it.",
+            "A row of sleeping rooms at the end of the train. The farther you go from civilization, the stranger things seem to get."
+        ]
+    },  
+
+    "engine_room": {
+        "channel_id": ENGINE_ID,
+        "command_channel_id": ENGINE_ID,
+        "front": "back_dorm",
+        "back": "outside_back",
+        "look_descriptions": [
+            "The heart of the train, powered by coal, machinery, and questionable amounts of danger.\nThe lights come from here, so try not to break anything unless you enjoy darkness.",
+            "A loud, hot room filled with gears, coal, and enough machinery to make anyone nervous.\nThe train keeps moving because of this place.\nSo does everyone's fear.",
+            'The engine room is where the coal burns and the power flows. It is impressive, terrifying, and probably the worst place to say "I wonder what this button does."'
+        ]
+    }, 
+    
+    "outside_back": {
+        "channel_id": OUTSIDE_BACK_ID,
+        "command_channel_id": OUTSIDE_BACK_ID,
+        "front": "engine_room",
+        "back": None,
+        "look_descriptions": [
+            "The rear platform of the train. Open air, moving tracks, and absolutely nothing stopping someone from having a very unfortunate accident.",
+            "The back of the train offers a beautiful view of the world disappearing behind you. Just remember not to stand too close to the edge.",
+            "The outside back area. A relaxing place to watch the scenery, unless someone decides you're part of the scenery."
         ]
     },  
     
