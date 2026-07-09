@@ -507,7 +507,7 @@ def setup_commands(bot):
                 target_member = interaction.guild.get_member(int(target_id))
                 if target_member:
                     await target_member.send(
-                        f"{death_message}\n\n*You are now a corpse. You may continue roleplaying as one, but you can no longer use game commands.*"
+                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname}, whom killed you with the {item_data["name"]}.\nThe last voyage of the Harpy Express has 1 survivor less."
                     )
         
         if target_type == "none":
