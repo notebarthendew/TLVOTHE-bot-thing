@@ -132,7 +132,7 @@ ITEMS = {
 
             "<:RevolverAction:1446671822090403900> The revolver barked, and {target} hit the floor.",
 
-            "<:RevolverAction:1446671822090403900> Smoke drifted from the revolver {user} fired as {target} fell.,
+            "<:RevolverAction:1446671822090403900> Smoke drifted from the revolver {user} fired as {target} fell.",
 
             "<:RevolverAction:1446671822090403900> {user} introduced {target} to the second amendment."
             
