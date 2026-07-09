@@ -41,6 +41,7 @@ def create_player(user_id, nickname, spawn_room):
         "role": None,
         "inventory": [],
         "status": [],
+        "cooldowns": {},
         "nickname": nickname
     }
     print(f"Created player: {user_id}")
