@@ -316,7 +316,7 @@ def setup_commands(bot):
         await interaction.response.send_message(
             f"## {look_message}\n"
             "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n"
-            f"{description}\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n\n"
+            f"{description}\n-.-.-.-.-.-.-.-.-.-.-\n\n"
             f"People here:\n{people_text}\n\n"
             f"{corpse_section}"
             f"{items_section}"
@@ -422,7 +422,24 @@ def setup_commands(bot):
             )
 
             return
+            
+        if "cooldown" in item_data:
+        
+            cooldowns = players[user_id]["cooldowns"]
 
+            now = time.time()
+
+            if item in cooldowns:
+
+                if cooldowns[item] > now:
+    
+                    remaining = int(cooldowns[item] - now)
+
+                    await interaction.response.send_message(
+                        f"That item is on cooldown for another **{format_time(remaining)}**.",
+                        ephemeral=True
+                    )
+        
         if target_type == "none" and target is not None:
 
             await interaction.response.send_message(
@@ -530,6 +547,14 @@ def setup_commands(bot):
             
             save_players()
 
+        if "cooldown" in item_data:
+
+            players[user_id]["cooldowns"][item] = (
+                time.time() + item_data["cooldown"]
+            )
+
+            save_players()
+       
     @bot.tree.command(
     name="take", 
     description="Pick up an item from the room you are in."
