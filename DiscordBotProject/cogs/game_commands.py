@@ -485,6 +485,12 @@ def setup_commands(bot):
                             target=target_nickname
                         )
                     )
+
+                death_message = random.choice(item_data["death_messages"])
+                
+                await target.send(
+                    f"{death_message}\n\n*You are now a corpse. You may continue roleplaying as one, but you can no longer use game commands.*"
+                )
         
         if target_type == "none":
         
