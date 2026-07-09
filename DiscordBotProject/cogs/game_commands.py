@@ -56,21 +56,36 @@ def setup_commands(bot):
 
     async def room_player_autocomplete(interaction, current: str):
         user_id = str(interaction.user.id)
-        
+
         if user_id not in players:
             return []
 
         current_room = players[user_id]["room"]
-        
-        return [
+
+        choices = []
+
+        if "yourself".startswith(current.lower()) or current == "":
+            choices.append(
+                app_commands.Choice(
+                    name="Yourself",
+                    value=user_id
+                )
+            )
+
+        choices.extend(
             app_commands.Choice(
-                name=players[pid]["nickname"],
+                name=pdata["nickname"],
                 value=pid
             )
             for pid, pdata in players.items()
-            if pid != user_id and pdata["room"] == current_room
-            and current.lower() in pdata["nickname"].lower()
-        ][:25]
+            if (
+                pid != user_id
+                and pdata["room"] == current_room
+                and current.lower() in pdata["nickname"].lower()
+            )
+        )
+
+    return choices[:25]
         
     
     @bot.tree.command(
