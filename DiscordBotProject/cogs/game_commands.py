@@ -400,7 +400,7 @@ def setup_commands(bot):
         if not item_data["usable"]:
 
             await interaction.response.send_message(
-                "That item cannot be used.",
+                "You can't really seem to find a use for this item.",
                 ephemeral=True
             )
 
