@@ -40,8 +40,21 @@ ITEMS = {
 
             "<:KnifeAction:1448502320261496852> {user} decided life wasn't worth it anymore."
 
-        ]
+        ],
 
+        "death_messages": [
+
+            "You felt a sharp object pierce your body.",
+
+            "A sudden stabbing pain shoots through your body.",
+
+            "The last thing you feel is cold steel sinking into you.",
+
+            "Your legs give out as the knife finds its mark."
+
+        ]
+}
+        
     },
 
     "sirenenote": {
@@ -139,6 +152,18 @@ ITEMS = {
             "<:RevolverAction:1446671822090403900> {user} somehow became their own target.",
 
             "<:RevolverAction:1446671822090403900> {user} proved that talking things out was overrated."
+
+        ]
+
+        "death_messages": [
+
+            "A gunshot rings out, followed by an unbearable pain in your chest.",
+
+            "Something slams into you with terrifying force.",
+
+            "You hear the shot a split second before everything goes dark.",
+
+            "The impact knocks the breath out of you as you collapse."
 
         ]
     },
