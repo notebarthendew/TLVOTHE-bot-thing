@@ -152,7 +152,7 @@ ITEMS = {
 
             "<:RevolverAction:1446671822090403900> {user} proved that talking things out was overrated."
 
-        ]
+        ],
 
         "death_messages": [
 
