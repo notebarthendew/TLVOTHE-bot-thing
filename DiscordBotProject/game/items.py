@@ -14,7 +14,7 @@ ITEMS = {
 
         "consumable": False,
 
-        # maybe do somethign abt cooldown with import time and time.time()
+        "cooldown": 60 * 60 * 8, # eit horcus
         
         "target_type": "player",
 
@@ -116,6 +116,8 @@ ITEMS = {
 
         "action": "kill",
 
+        "cooldown": 60 * 60 * 5, # fiv horcus
+
         "kill_messages": [
 
             "<:RevolverAction:1446671822090403900> {user} fired a shot straight into {target}.",
@@ -183,9 +185,33 @@ ITEMS = {
 
         "consumable": False,
 
-        "target_type": "na"
+        "target_type": "player",
+
+        "action": "protect",
+        
+        "cooldown": 60 * 60 * 5 # fiv horcus
         
     },
-    
+
+    "poisonbottle": {
+
+        "name": "Poison Bottle",
+
+        "emoji": "<:Keys:1453900262698651749>",
+        
+        "description": (
+            "Apply it to a food or drink tray and if someone eats it, it will guarantee their death... slowly but surely."
+        ),
+
+
+        "usable": False,
+
+        "consumable": True,
+
+        "target_type": "room",
+
+        "action": "poison"
+        
+    },
 }
 # Available target_type thingamagigs: "none", "player", "room", "corpse", "self", "na".
