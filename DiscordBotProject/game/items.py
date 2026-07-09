@@ -62,8 +62,106 @@ ITEMS = {
 
         "target_type": "none"
         
-    }
+    },
 
+    
+    "keys": {
+
+        "name": "Keys",
+
+        "emoji": "<:Keys:1453900262698651749>",
+        
+        "description": (
+            "The keys to your cabin. You can't get in if you lose them, so keep them close to you."
+        ),
+
+
+        "usable": False,
+
+        "consumable": False,
+
+        "target_type": "na"
+        
+    },
+
+
+    "gun": {
+
+        "name": "Revolver",
+
+        "emoji": "<:Revolver:1446659751927611412>",
+        
+        "description": (
+            "A powerful firearm, capable of killing anyone with one bullet"
+        ),
+
+
+        "usable": True,
+
+        "consumable": False,
+
+        "target_type": "player",
+
+        "action": "kill",
+
+        "kill_messages": [
+
+            "<:RevolverAction:1446671822090403900> {user} fired a shot straight into {target}.",
+
+            "<:RevolverAction:1446671822090403900> A gunshot echoed through the train as {user} shot {target}.",
+
+            "<:RevolverAction:1446671822090403900> {target} collapsed after being shot by {user}.",
+
+            "<:RevolverAction:1446671822090403900> {user} pulled the trigger. {target} never got back up.",
+
+            "<:RevolverAction:1446671822090403900> One deafening shot later, caused by {user}, {target} laid dead.",
+
+            "<:RevolverAction:1446671822090403900> {user} fired without hesitation, killing {target}.",
+
+            "<:RevolverAction:1446671822090403900> The revolver barked, and {target} hit the floor.",
+
+            "<:RevolverAction:1446671822090403900> Smoke drifted from the revolver {user} fired as {target} fell.,
+
+            "<:RevolverAction:1446671822090403900> {user} introduced {target} to the second amendment."
+            
+        ],
+
+        "self_kill_messages": [
+
+            "<:RevolverAction:1446671822090403900> {user} accidentally shot themselves. Nice one.",
+
+            "<:RevolverAction:1446671822090403900> {user} looked down the wrong end of the revolver.",
+
+            "<:RevolverAction:1446671822090403900> {user} forgot basic firearm safety.",
+
+            "<:RevolverAction:1446671822090403900> A single shot rang out. {user} wasn't getting back up.",
+
+            "<:RevolverAction:1446671822090403900> {user} somehow became their own target.",
+
+            "<:RevolverAction:1446671822090403900> {user} proved that talking things out was overrated."
+
+        ]
+    },
+
+    
+    "platearmor": {
+
+        "name": "Plate Armor",
+
+        "emoji": "<:PlateArmor:1523352005240684694>",
+        
+        "description": (
+            "Apply it to someone, and it might just save them from a killing blow. Also light enough for the person to be wearing it to not notice."
+        ),
+
+
+        "usable": False,
+
+        "consumable": False,
+
+        "target_type": "na"
+        
+    },
+    
 }
-
-# Available target_type thingamagigs: "none", "player", "room", "corpse", "self".
+# Available target_type thingamagigs: "none", "player", "room", "corpse", "self", "na".
