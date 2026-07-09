@@ -503,9 +503,12 @@ def setup_commands(bot):
 
                 death_message = random.choice(item_data["death_messages"])
                 
-                await target.send(
-                    f"{death_message}\n\n*You are now a corpse. You may continue roleplaying as one, but you can no longer use game commands.*"
-                )
+                # Get the Discord member and send them a DM if they exist
+                target_member = interaction.guild.get_member(int(target_id))
+                if target_member:
+                    await target_member.send(
+                        f"{death_message}\n\n*You are now a corpse. You may continue roleplaying as one, but you can no longer use game commands.*"
+                    )
         
         if target_type == "none":
         
@@ -728,5 +731,6 @@ def setup_commands(bot):
         )
 
 # h
+
 
 
