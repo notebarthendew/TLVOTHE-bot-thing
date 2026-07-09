@@ -439,6 +439,8 @@ def setup_commands(bot):
                         f"That item is on cooldown for another **{format_time(remaining)}**.",
                         ephemeral=True
                     )
+                    
+                    return
         
         if target_type == "none" and target is not None:
 
