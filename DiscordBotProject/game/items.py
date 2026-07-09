@@ -53,7 +53,6 @@ ITEMS = {
             "Your legs give out as the knife finds its mark."
 
         ]
-}
         
     },
 
