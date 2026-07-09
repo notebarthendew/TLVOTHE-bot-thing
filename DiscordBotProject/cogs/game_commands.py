@@ -85,7 +85,7 @@ def setup_commands(bot):
             )
         )
 
-    return choices[:25]
+        return choices[:25]
         
     
     @bot.tree.command(
