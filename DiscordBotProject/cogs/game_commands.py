@@ -1,4 +1,5 @@
 import random
+import time
 from collections import Counter
 
 from discord import app_commands
@@ -11,6 +12,7 @@ from utils.constants import ADMIN_ROLE_ID
 from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
 from utils.helpers import check_player_status
+from utils.helpers import format_time
 from game.map import ROOMS
 from game.room_items import room_items
 
@@ -521,6 +523,11 @@ def setup_commands(bot):
 
             players[user_id]["inventory"].remove(item)
 
+            await interaction.response.send_message(
+                "The item withers away from your very own eyes.",
+                ephemeral=True
+            )
+            
             save_players()
 
     @bot.tree.command(
