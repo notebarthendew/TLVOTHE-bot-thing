@@ -213,5 +213,43 @@ ITEMS = {
         "action": "poison"
         
     },
+
+    "martini": {
+
+        "name": "Martini",
+
+        "emoji": ":worried:",
+        
+        "description": (
+            "An imppecable beverage to have in this millenium. Don't... drink too much, please."
+        ),
+
+
+        "usable": False,
+
+        "consumable": True,
+
+        "target_type": "na"
+
+    },
+
+    "fries": {
+
+        "name": "Fries",
+
+        "emoji": ":fries:",
+        
+        "description": (
+            "ALL OUR FOOD KEEPS BLOWING U-!"
+        ),
+
+
+        "usable": False,
+
+        "consumable": True,
+
+        "target_type": "na"
+
+    },
 }
 # Available target_type thingamagigs: "none", "player", "room", "corpse", "self", "na".
