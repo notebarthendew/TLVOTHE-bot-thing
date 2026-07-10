@@ -41,7 +41,8 @@ ROOMS = {
             "This is the place where someone important probably drives the train. Probably.\nA giant horn sits here, waiting for someone to ring it and annoy every single person aboard.\nThe controls look complicated enough that touching anything might either save the train or make everyone explode.",
             "The conductor's sacred workplace, now mostly used for people pressing buttons and pulling levers they shouldn't.\nThe horn echoes through every room when activated, reminding everyone that peace was never an option.",
             "The cockpit contains the steering equipment, several suspicious levers, and one extremely loud horn.\nNobody knows why the horn exists.\nEveryone knows someone will pull on it anyway."
-        ]
+        ],
+        "take_items": []
     },
 
     "outside_front": {
@@ -53,7 +54,8 @@ ROOMS = {
             "An open cabin area at the front of the train.\nFresh air, a nice view, and a very convenient lack of walls. Try not to stand too close to the edge unless you trust everyone around you.",
             "The outside front platform. A beautiful place to admire the scenery and also a perfect place to suddenly remember gravity exists.",
             "Wind blows through the front cabin area. The view is amazing. The safety rails are questionable. The people are worse."
-        ]
+        ],
+        "take_items": []
     },
 
     "front": {
@@ -65,7 +67,8 @@ ROOMS = {
             "The front hallway of the train. A normal-looking corridor with absolutely nothing suspicious about it.\nIgnore the stains.\nIgnore the noises.\n*Keep walking.*",
             "A hallway connecting the front sections of the train. Many people have walked here. Not all of them have walked away.",
             "bleh"
-        ]
+        ],
+        "take_items": []
     },
 
     "dining_room": {
@@ -77,7 +80,8 @@ ROOMS = {
             "Its a fancy place where passengers can eat peacefully while pretending nobody is secretly planning anything horrible.",
             "Tables, chairs, and a suspiciously clean eating area. The food is probably safe. The company is questionable.",
             "A room designed for dinner conversations, awkward silence, and people dramatically accusing each other while holding forks."
-        ]
+        ],
+        "take_items": []
     },
 
     "kitchen": {
@@ -89,7 +93,8 @@ ROOMS = {
             "Where meals are prepared and where every object somehow looks like it could become a weapon.",
             "Pots, pans, knives, and enough cooking equipment to make everyone suddenly very nervous.",
             "The kitchen smells great. Unfortunately, it also contains everything needed for a cooking show or a crime documentary."
-        ]
+        ],
+        "take_items": []
     },
 
     "front_dorm": {
@@ -101,7 +106,8 @@ ROOMS = {
             "A collection of passenger rooms where people sleep, hide things, and definitely do not plan suspicious activities.",
             "Rows of tiny rooms (don't mind the Cabin Suite) belonging to passengers.\nCozy enough to rest. Isolated enough to make everyone wonder what happened inside.",
             "The sleeping area near the front of the train. Everyone has a room. Everyone has secrets."
-        ]
+        ],
+        "take_items": []
     },
 
     "luggage_room": {
@@ -113,7 +119,8 @@ ROOMS = {
             "Bags, boxes, and mysterious objects that nobody admits belong to them.",
             "A storage area filled with everyone's belongings. If something goes missing, nobody knows who took it.\nConvenient.",
             "The sleeping area near the front of the train. Everyone has a room. Everyone has secrets."
-        ]
+        ],
+        "take_items": []
     },    
 
     "library": {
@@ -125,7 +132,8 @@ ROOMS = {
             "A quiet place filled with books and a drink tray for anyone who wants to relax before everything goes horribly wrong.",
             'Shelves full of knowledge and a tray of drinks waiting nearby. Reading helps pass time. Alcohol helps people make bad decisions faster.',
             "A peaceful library with comfortable seats, old books, and beverages that may or may not explain tomorrow's regrets."
-        ]
+        ],
+        "take_items": []
     }, 
 
     "infirmary": {
@@ -137,7 +145,8 @@ ROOMS = {
             "A place meant for healing passengers. Hopefully there won't be too much work for it.\n-# Hopefully.",
             'Medical supplies line the room. The room is prepared for anything. Unfortunately, "anything" keeps happening.',
             "A clean medical room full of equipment and uncomfortable reminders that this train ride is not normal."
-        ]
+        ],
+        "take_items": []
     },
 
     "mid_dorm": {
@@ -149,7 +158,8 @@ ROOMS = {
             "Passenger rooms located safely in the middle of the train, away from danger.\nProbably.",
             "Another sleeping area filled with tired passengers and locked doors. A perfect place to rest or hide.",
             "The central dorm section. Quiet rooms, long hallways, and the occasional suspicious noise."
-        ]
+        ],
+        "take_items": []
     },  
 
     "cafeteria": {
@@ -161,7 +171,8 @@ ROOMS = {
             "A food tray sits ready for passengers. Finally, something normal on this train.",
             "Tables, chairs, and a large food tray waiting to be served. Everyone gathers here eventually.\nThat is either convenient or terrifying.",
             "The cafeteria provides meals, conversations, and the perfect place for everyone to stop eating when someone starts accusing another person."
-        ]
+        ],
+        "take_items": []
     },  
 
     "storage": {
@@ -173,7 +184,8 @@ ROOMS = {
             "Full of random supplies that may be useful or completely useless.",
             "Boxes and equipment fill the room. Nobody remembers putting half of this stuff here.",
             "A cramped storage area containing everything the train needs. And probably a few things it doesn't."
-        ]
+        ],
+        "take_items": []
     },  
 
     "bathroom": {
@@ -185,7 +197,8 @@ ROOMS = {
             "Somehow the only place where people expect privacy, despite being on a train full of detectives and murder suspects.",
             "A small bathroom area. Clean enough to use, suspicious enough to avoid staying too long.",
             "A peaceful place to think, panic, or wonder why someone left a note on the mirror."
-        ]
+        ],
+        "take_items": []
     },  
 
     "back_dorm": {
@@ -197,7 +210,8 @@ ROOMS = {
             "The passenger cabins near the back of the train. Far away from the cockpit, but somehow much closer to trouble.",
             "Quiet, isolated, and the perfect location for someone who wants to avoid attention... or attract it.",
             "A row of sleeping rooms at the end of the train. The farther you go from civilization, the stranger things seem to get."
-        ]
+        ],
+        "take_items": []
     },  
 
     "engine_room": {
@@ -209,7 +223,8 @@ ROOMS = {
             "The heart of the train, powered by coal, machinery, and questionable amounts of danger.\nThe lights come from here, so try not to break anything unless you enjoy darkness.",
             "A loud, hot room filled with gears, coal, and enough machinery to make anyone nervous.\nThe train keeps moving because of this place.\nSo does everyone's fear.",
             'The engine room is where the coal burns and the power flows. It is impressive, terrifying, and probably the worst place to say "I wonder what this button does."'
-        ]
+        ],
+        "take_items": []
     }, 
     
     "outside_back": {
@@ -221,7 +236,8 @@ ROOMS = {
             "The rear platform of the train. Open air, moving tracks, and absolutely nothing stopping someone from having a very unfortunate accident.",
             "The back of the train offers a beautiful view of the world disappearing behind you. Just remember not to stand too close to the edge.",
             "The outside back area. A relaxing place to watch the scenery, unless someone decides you're part of the scenery."
-        ]
+        ],
+        "take_items": []
     },  
     
     # OLD / TESTING TRAIN
@@ -234,7 +250,8 @@ ROOMS = {
             "This the description for room one.",
             "This is another description for room one",
             "This is yet another description for room one."
-        ]
+        ],
+        "take_items": []
     },
 
     "2": {
@@ -246,7 +263,8 @@ ROOMS = {
             "This the description for room two.",
             "This is another description for room two",
             "This is yet another description for room two."
-        ]
+        ],
+        "take_items": []
     },
 
     "3": {
@@ -258,7 +276,8 @@ ROOMS = {
             "This the description for room three.",
             "This is another description for room three",
             "This is yet another description for room three."
-        ]
+        ],
+        "take_items": []
     },
 
     "4": {
@@ -270,7 +289,8 @@ ROOMS = {
             "This the description for room four.",
             "This is another description for room four",
             "This is yet another description for room four."
-        ]
+        ],
+        "take_items": []
     },
 
     "5": {
@@ -282,7 +302,8 @@ ROOMS = {
             "This the description for room five.",
             "This is another description for room five",
             "This is yet another description for room five."
-        ]
+        ],
+        "take_items": []
     },
 
     "6": {
@@ -294,7 +315,8 @@ ROOMS = {
             "GETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHERE",
             "GETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHERE",
             "GETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHEREGETMEOUTOFHERE"
-        ]
+        ],
+        "take_items": []
     }
 
 }
