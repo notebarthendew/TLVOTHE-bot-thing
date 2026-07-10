@@ -81,7 +81,7 @@ ROOMS = {
             "Tables, chairs, and a suspiciously clean eating area. The food is probably safe. The company is questionable.",
             "A room designed for dinner conversations, awkward silence, and people dramatically accusing each other while holding forks."
         ],
-        "take_items": []
+        "take_items": ["fries"]
     },
 
     "kitchen": {
@@ -133,7 +133,7 @@ ROOMS = {
             'Shelves full of knowledge and a tray of drinks waiting nearby. Reading helps pass time. Alcohol helps people make bad decisions faster.',
             "A peaceful library with comfortable seats, old books, and beverages that may or may not explain tomorrow's regrets."
         ],
-        "take_items": []
+        "take_items": ["martini"]
     }, 
 
     "infirmary": {
@@ -172,7 +172,7 @@ ROOMS = {
             "Tables, chairs, and a large food tray waiting to be served. Everyone gathers here eventually.\nThat is either convenient or terrifying.",
             "The cafeteria provides meals, conversations, and the perfect place for everyone to stop eating when someone starts accusing another person."
         ],
-        "take_items": []
+        "take_items": ["fries"]
     },  
 
     "storage": {
