@@ -44,17 +44,31 @@ def setup_commands(bot):
             return []
 
         current_room = players[user_id]["room"]
-        items_in_room = room_items[current_room]
-        
-        return [
-            app_commands.Choice(
-                name=ITEMS[item["id"]]["name"],
-                value=item["id"]
-            )
-            for item in items_in_room
-            if current.lower() in ITEMS[item["id"]]["name"].lower()
-            or current.lower() in item["id"].lower()
-        ][:25]
+        room_take_items = ROOMS[current_room]["take_items"]
+
+        floor_items = room_items[current_room]
+
+        choices = []
+
+        for item in room_take_items:
+            if current.lower() in ITEMS[item]["name"].lower():
+                choices.append(
+                    app_commands.Choice(
+                        name=f"{ITEMS[item]['name']} (Room)",
+                        value=item
+                    )
+                )
+
+        for item in floor_items:
+            if current.lower() in ITEMS[item]["name"].lower():
+                choices.append(
+                    app_commands.Choice(
+                        name=f"{ITEMS[item]['name']} (Floor)",
+                        value=item
+                    )
+                )
+
+        return choices[:25]
 
     async def room_player_autocomplete(interaction, current: str):
         user_id = str(interaction.user.id)
@@ -609,22 +623,31 @@ def setup_commands(bot):
                 ephemeral=True
             )
             return
-        
-        room_items[current_room] = [i for i in room_items[current_room] if i["id"] != item]
-        players[user_id]["inventory"].append(item)
 
         user_nickname = players[user_id]["nickname"]
-        
+
         await interaction.response.send_message(
             f"You picked up **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})**.",
             ephemeral=True
         )
+        
+        if item in room_items[current_room]:
+        
+            room_items[current_room] = [i for i in room_items[current_room] if i["id"] != item]
+            players[user_id]["inventory"].append(item)
 
+            if allowed_channel:
+                await allowed_channel.send(
+                    f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
+                )
+        
+        elif item in ROOMS[current_room]["take_items"]:
 
-        if allowed_channel:
-            await allowed_channel.send(
-                f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
-            )
+            players[user_id]["inventory"].append(item)
+            if allowed_channel:
+                await allowed_channel.send(
+                    f"{user_nickname} grabbed a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the room."
+                )
 
     @bot.tree.command(
     name="give",
