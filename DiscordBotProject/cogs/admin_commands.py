@@ -173,16 +173,16 @@ def setup_commands(bot):
         member: discord.Member,
     ):
 
+        await interaction.response.defer(ephemeral=True)
+
         has_admin_role = any(
             role.id == ADMIN_ROLE_ID
             for role in interaction.user.roles
         )
 
         if not has_admin_role:
-
-            await interaction.response.send_message(
-                "You can't do that, silly.",
-                ephemeral=True
+            await interaction.edit_original_response(
+                content="You cant do that silly."
             )
 
             return
@@ -190,10 +190,8 @@ def setup_commands(bot):
         user_id = str(member.id)
 
         if user_id not in players:
-
-            await interaction.response.send_message(
-                "That player is not in the game.",
-                ephemeral=True
+            await interaction.edit_original_response(
+                content="That player isn't in the game."
             )
 
             return
@@ -219,10 +217,9 @@ def setup_commands(bot):
             await member.remove_roles(game_role)
 
         remove_player(user_id)
-        
-        await interaction.response.send_message(
-            f"{member.mention} was removed from the game.",
-            ephemeral=True
+
+        await interaction.edit_original_response(
+            content=f"{member.mention} was removed from the game."
         )
     
     @bot.tree.command(name="checkplayers")

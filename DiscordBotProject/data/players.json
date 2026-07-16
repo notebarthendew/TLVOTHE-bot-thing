@@ -1,1 +1,15 @@
-{}
+{
+    "1087129816416919613": {
+        "room": "4",
+        "alive": true,
+        "role": null,
+        "inventory": [
+            "soda",
+            "newspaper_1"
+        ],
+        "status": [],
+        "cooldowns": {},
+        "edge_warnings": 0,
+        "nickname": "Snowy"
+    }
+}

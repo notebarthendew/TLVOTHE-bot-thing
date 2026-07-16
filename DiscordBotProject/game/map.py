@@ -26,6 +26,7 @@ from utils.constants import (
     BATHROOM_ID,
     BACK_DORM_ID,
     BACK_DORM_THREAD_ID,
+    PRINTER_ID,
     ENGINE_ID,
     OUTSIDE_BACK_ID,
 )
@@ -39,7 +40,7 @@ ROOMS = {
         "back": "outside_front",
         "look_descriptions": [
             "This is the place where someone important probably drives the train. Probably.\nA giant horn sits here, waiting for someone to ring it and annoy every single person aboard.\nThe controls look complicated enough that touching anything might either save the train or make everyone explode.",
-            "The conductor's sacred workplace, now mostly used for people pressing buttons and pulling levers they shouldn't.\nThe horn echoes through every room when activated, reminding everyone that peace was never an option.",
+            "The conductor's sacred workplace, now mostly used for people pressing buttons and pulling levers they shouldn't.\nThe horn echoes through every room when activated, reminding everyone that... this isn't normal.",
             "The cockpit contains the steering equipment, several suspicious levers, and one extremely loud horn.\nNobody knows why the horn exists.\nEveryone knows someone will pull on it anyway."
         ],
         "take_items": []
@@ -64,7 +65,7 @@ ROOMS = {
         "front": "outside_front",
         "back": "dining_room",
         "look_descriptions": [
-            "The front hallway of the train. A normal-looking corridor with absolutely nothing suspicious about it.\nIgnore the stains.\nIgnore the noises.\n*Keep walking.*",
+            "The front hallway of the train. A normal-looking corridor with absolutely nothing suspicious about it.\nIgnore the stains.\nIgnore the noises.\n### *Keep walking.*",
             "A hallway connecting the front sections of the train. Many people have walked here. Not all of them have walked away.",
             "bleh"
         ],
@@ -103,7 +104,7 @@ ROOMS = {
         "front": "kitchen",
         "back": "luggage_room",
         "look_descriptions": [
-            "A collection of passenger rooms where people sleep, hide things, and definitely do not plan suspicious activities.",
+            "A collection of passenger rooms where people sleep, hide things, and definitely do not plan suspicious activities.\n -# or just exist for that matted.",
             "Rows of tiny rooms (don't mind the Cabin Suite) belonging to passengers.\nCozy enough to rest. Isolated enough to make everyone wonder what happened inside.",
             "The sleeping area near the front of the train. Everyone has a room. Everyone has secrets."
         ],
@@ -117,8 +118,8 @@ ROOMS = {
         "back": "library",
         "look_descriptions": [
             "Bags, boxes, and mysterious objects that nobody admits belong to them.",
-            "A storage area filled with everyone's belongings. If something goes missing, nobody knows who took it.\nConvenient.",
-            "The sleeping area near the front of the train. Everyone has a room. Everyone has secrets."
+            "A storage area filled with everyone's belongings. If something goes missing, nobody knows who took it.\n*Convenient.*",
+            "Hey, the luggage hasn't been lost for some \"lore\" reason.\nGood luck trying to find yours though!"
         ],
         "take_items": []
     },    
@@ -205,7 +206,7 @@ ROOMS = {
         "channel_id": BACK_DORM_ID,
         "command_channel_id": BACK_DORM_THREAD_ID,
         "front": "bathroom",
-        "back": "engine_room",
+        "back": "printer_room",
         "look_descriptions": [
             "The passenger cabins near the back of the train. Far away from the cockpit, but somehow much closer to trouble.",
             "Quiet, isolated, and the perfect location for someone who wants to avoid attention... or attract it.",
@@ -214,10 +215,23 @@ ROOMS = {
         "take_items": []
     },  
 
+    "printer_room": {
+        "channel_id": PRINTER_ID,
+        "command_channel_id": PRINTER_ID,
+        "front": "back_dorm",
+        "back": "engine_room",
+        "look_descriptions": [
+            "Stacks of freshly printed newspapers sit neatly beside a heavy iron printing press.\nThe room smells strongly of ink and paper, while countless trays of tiny metal letters line the walls, ready to be arranged into tomorrow's headlines.",
+            "The rhythmic *clack... clack... clack...* of the printing press fills the room, almost drowning out the sound of the train itself.\nHalf-finished papers hang to dry from strings overhead, each waiting to be folded and delivered throughout the Harpy Express.",
+            "An industrial printing press tirelessly spits out newspapers, blissfully unaware that murders may be happening just a few cabins away.\nSomewhere, an editor is probably trying to decide whether to put 'Coal Prices Rise Again' or 'Passenger Found Stabbed' on tomorrow's front page."
+        ],
+        "take_items": []
+    },
+
     "engine_room": {
         "channel_id": ENGINE_ID,
         "command_channel_id": ENGINE_ID,
-        "front": "back_dorm",
+        "front": "printer_room",
         "back": "outside_back",
         "look_descriptions": [
             "The heart of the train, powered by coal, machinery, and questionable amounts of danger.\nThe lights come from here, so try not to break anything unless you enjoy darkness.",

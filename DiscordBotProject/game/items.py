@@ -251,5 +251,71 @@ ITEMS = {
         "target_type": "na"
 
     },
+
+    "soda": {
+
+        "name": "Cherry Soda",
+
+        "emoji": "<:CherrySoda:1527067200748261386>",
+
+        "description": (
+            "A very delectable an modern soda, using an elongated soup can to store it's cherry flavour.\nTruly one of the inventions of the era!\n-# Don't mind that the liquid shoots out in one direction when you open it."
+        ),
+
+        "usable": False,
+
+        "consumable": True,
+
+        "target_type": "na"
+
+    },
+
+    "newspaper_1": {
+
+        "name": "Newspaper",
+
+        "emoji": "<:Note:1522803594313601114>", # its a reading thing so it has teh note thing
+
+        "description": (
+            'A newspaper dated before January 1st. Oh hey! It\'s "The Harpy Herald"! I like them.'
+        ),
+
+        "text": "# 📰 THE HARPY HERALD\n\n"
+        "*Keeping the rails informed since 1894.*\n\n"
+        "## LOCAL NEWS\n\n"
+        "**MYSTERIOUS DELAYS OUTSIDE GREYRIDGE**\n"
+        "Yesterday's Harpy Express was delayed after debris was found on the tracks. Railway officials insist there was no danger, though workers continue to whisper about \"someone walking beside the rails at night.\"\n\n"
+        "## TRAVEL & ETIQUETTE\n\n"
+        "**A REMINDER TO ALL PASSENGERS**\n"
+        "- Do not enter cabins that are not yours.\n"
+        "- Keep your belongings with you.\n"
+        "- Unattended luggage may be inspected.\n"
+        "- Do not lean over the outside platforms while the train is moving.\n\n"
+        "## MARKET REPORT\n\n"
+        "**Coal prices continue to rise** as industrial demand increases. Railway officials expect no disruption to scheduled services.\n\n"
+        "## SOCIAL COLUMN\n\n"
+        "Miss Eleanor Winslow of Eastbridge celebrated her engagement aboard the Harpy Express yesterday. Fellow passengers offered congratulations, tea, and more advice than requested.\n\n"
+        "## CLASSIFIEDS\n\n"
+        "**FOR SALE**\n"
+        "Pocket watch. Slightly scratched. Keeps perfect time. Ask the gentleman in the brown waistcoat.\n\n"
+        "**LOST**\n"
+        "Leather suitcase containing clothes, a journal, and one rather unhappy pet canary. Please notify train staff if found.\n\n"
+        "## OPINION\n\n"
+        "\"The dining carriage's tomato soup has improved considerably. Whether this is due to a better recipe or lower expectations remains uncertain.\"\n"
+        "— Anonymous Passenger\n\n"
+        "## WEATHER\n\n"
+        "Clear skies are expected throughout today's journey. Evening temperatures may become chilly; passengers visiting the open-air platforms are advised to bring a coat.\n\n"
+        "---\n"
+        "*The Harpy Herald is printed every morning. Remember: gossip isn't news... unless it's entertaining enough.*",
+
+        "usable": True,
+
+        "consumable": False,
+
+        "target_type": "none"
+
+    },
+
 }
+
 # Available target_type thingamagigs: "none", "player", "room", "corpse", "self", "na".

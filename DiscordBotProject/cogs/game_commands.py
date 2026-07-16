@@ -5,7 +5,7 @@ from collections import Counter
 from discord import app_commands
 import discord
 
-from game.player import players, create_player, save_players
+from game.player import players, create_player, save_players, kill_player
 from game.movement import move_player
 from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
@@ -59,12 +59,14 @@ def setup_commands(bot):
                     )
                 )
 
-        for item in floor_items:
-            if current.lower() in ITEMS[item]["name"].lower():
+        for item_data in floor_items:
+            item_id = item_data["id"]
+
+            if current.lower() in ITEMS[item_id]["name"].lower():
                 choices.append(
                     app_commands.Choice(
-                        name=f"{ITEMS[item]['name']} (Floor)",
-                        value=item
+                        name=f"{ITEMS[item_id]['name']} (Floor)",
+                        value=item_id
                     )
                 )
 
@@ -130,6 +132,18 @@ def setup_commands(bot):
             await interaction.response.send_message(error, ephemeral=True)
             return
 
+        EDGE_WARNINGS = [
+
+            "You stop yourself just before stepping off the train.",
+
+            "The tracks rush beneath you. That would've been a terrible idea.",
+
+            "You nearly lose your footing.",
+
+            "You stare into the blur of the railway below."
+
+        ]
+
         nickname = players[user_id]["nickname"]
         
         current_room = players[user_id]["room"]
@@ -161,10 +175,53 @@ def setup_commands(bot):
         result = move_player(
             players[user_id],
             direction.value
-        )
+        ) # this "checks" the room than actually moving the player
 
         
-        if result is None:
+        if current_room == "outside_back" and direction.value == "back": # only for this one since its the back of the train and nothing else, where in the front version is the bridge to the cockpit
+
+            players[user_id]["edge_warnings"] += 1
+
+            save_players()
+
+            if players[user_id]["edge_warnings"] < 3:
+
+                await interaction.response.send_message(
+                    random.choice(EDGE_WARNINGS),
+                    ephemeral=True
+                )
+
+                return
+
+            elif players[user_id]["edge_warnings"] >= 3:
+
+                await interaction.response.defer(ephemeral=True)
+
+                await kill_player(
+                    interaction.guild,
+                    interaction.user,
+                    user_id
+                ) # this already does the permission things so dw
+
+                await interaction.edit_original_response(
+                    content="You took one step too many."
+                )
+
+                await old_channel_main.send(
+                    f"{nickname} lost their balance and disappeared beneath the train."
+                )
+
+                await interaction.user.send(
+                    f"## You lose your footing on the platform, and fall to the tracks.\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nYou killed yourself by jumping off the train.\nYou become forgotten from the history books."
+                )
+
+                players[user_id]["room"] = "1"
+                players[user_id]["edge_warnings"] = 0
+                save_players()
+
+                return
+
+        elif result is None:
 
             await interaction.response.send_message(
                 f"*{nickname} confidently walks into a wall*.",
@@ -186,7 +243,10 @@ def setup_commands(bot):
         new_channel_main = interaction.guild.get_channel(
             ROOMS[result]["channel_id"]         
         )
-        
+
+        players[user_id]["edge_warnings"] = 0
+        save_players()
+
         await interaction.response.send_message(
             f"*{nickname} moved to the {direction.value} of the train.*",
         )
@@ -476,7 +536,16 @@ def setup_commands(bot):
 
                 return
 
-            target_id = target
+            target_member = interaction.guild.get_member(int(target_id))
+
+            if target_member is None:
+                await interaction.response.send_message(
+                    "That Discord member couldn't be found.",
+                    ephemeral=True
+                )
+                return
+
+            target_id = str(target.id)
             
             if target_id not in players:
 
@@ -489,6 +558,7 @@ def setup_commands(bot):
 
             target_nickname = players[target_id]["nickname"]
             user_nickname = players[user_id]["nickname"]
+            user_role = players[user_id]["role"]
 
             if not players[target_id]["alive"]:
 
@@ -503,22 +573,18 @@ def setup_commands(bot):
             
             if action == "kill":
 
-                players[target_id]["alive"] = False
+                await interaction.response.defer(ephemeral=True)
 
-                dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
-                game_role = interaction.guild.get_role(GAME_ROLE_ID)
-
-                # Get the Discord member to update roles
-                target_member = interaction.guild.get_member(int(target_id))
-                if target_member:
-                    await target_member.remove_roles(game_role)
-                    await target_member.add_roles(dead_role)
+                await kill_player(
+                    interaction.guild,
+                    target_member,
+                    target_id
+                )
                 
                 save_players()
 
-                await interaction.response.send_message(
-                    "Action made successfully.",
-                    ephemeral=True
+                await interaction.edit_original_response(
+                    content="Action carried out sucesfully."
                 )
 
                 if target_id == user_id:
@@ -542,7 +608,7 @@ def setup_commands(bot):
                 target_member = interaction.guild.get_member(int(target_id))
                 if target_member:
                     await target_member.send(
-                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname}, whom killed you with the {item_data["name"]}.\nThe last voyage of the Harpy Express has 1 survivor less."
+                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname} thr {user_role}, whom killed you with the {item_data["name"]}.\nYou become forgotten from the history books."
                     )
         
         if target_type == "none":
@@ -599,7 +665,7 @@ def setup_commands(bot):
         allowed_channel = interaction.guild.get_channel(
                 allowed_channel_id
         )
-        
+
         if interaction.channel.id != allowed_channel_id:
 
             await interaction.response.send_message(
@@ -630,24 +696,31 @@ def setup_commands(bot):
             f"You picked up **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})**.",
             ephemeral=True
         )
-        
-        if item in room_items[current_room]:
-        
-            room_items[current_room] = [i for i in room_items[current_room] if i["id"] != item]
+
+        if item_in_room:
+
+            for i, room_item in enumerate(room_items[current_room]):
+                if room_item["id"] == item:
+                    room_items[current_room].pop(i)
+                    break
+
             players[user_id]["inventory"].append(item)
 
             if allowed_channel:
                 await allowed_channel.send(
                     f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
                 )
-        
-        elif item in ROOMS[current_room]["take_items"]:
+
+        else:
 
             players[user_id]["inventory"].append(item)
+
             if allowed_channel:
                 await allowed_channel.send(
                     f"{user_nickname} grabbed a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the room."
                 )
+
+        save_players()
 
     @bot.tree.command(
     name="give",
