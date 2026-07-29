@@ -108,7 +108,7 @@ def setup_commands(bot):
     
     @bot.tree.command(
     name="move",
-    description="Move through the train"
+    description="(PLAYER) Move through the train"
     )
 
     @app_commands.describe(
@@ -273,7 +273,7 @@ def setup_commands(bot):
     
     @bot.tree.command(
     name="look",
-    description="👀"
+    description="(PLAYER) 👀"
     )
     
     async def look(interaction: discord.Interaction):
@@ -427,7 +427,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-    @bot.tree.command(name="use",description="Use an item from your inventory.")
+    @bot.tree.command(name="use",description="(PLAYER) Use an item from your inventory.")
 
     @app_commands.autocomplete(
         item=inventory_item_autocomplete,
@@ -536,6 +536,8 @@ def setup_commands(bot):
 
                 return
 
+            target_id = target
+
             target_member = interaction.guild.get_member(int(target_id))
 
             if target_member is None:
@@ -544,8 +546,6 @@ def setup_commands(bot):
                     ephemeral=True
                 )
                 return
-
-            target_id = str(target.id)
             
             if target_id not in players:
 
@@ -559,6 +559,7 @@ def setup_commands(bot):
             target_nickname = players[target_id]["nickname"]
             user_nickname = players[user_id]["nickname"]
             user_role = players[user_id]["role"]
+            target_role = players[target_id]["role"]
 
             if not players[target_id]["alive"]:
 
@@ -573,6 +574,24 @@ def setup_commands(bot):
             
             if action == "kill":
 
+                if user_role == "passenger" or user_role == "vigilante" and item == "knife" and target != "Yourself":
+
+                    await interaction.response.send_message(
+                        f"You can't bring yourself to kill {target_nickname}.",
+                        ephemeral=True
+                    )
+
+                    return
+
+                if user_role == "murderer" and target_role == "murderer":
+
+                    await interaction.response.send_message(
+                        f"You can't kill {target_nickname}, your murderer co-hort.",
+                        ephemeral=True
+                    )
+
+                    return
+
                 await interaction.response.defer(ephemeral=True)
 
                 await kill_player(
@@ -580,20 +599,34 @@ def setup_commands(bot):
                     target_member,
                     target_id
                 )
-                
+
+                if user_role == "murderer":
+                    players[user_id]["coins"] += 100
+
                 save_players()
 
-                await interaction.edit_original_response(
-                    content="Action carried out sucesfully."
-                )
+                if user_role == "murderer":
+                    await interaction.edit_original_response(
+                        content="Player killed.\n### You got 100 coins for that!"
+                    )
+                else:
+                    await interaction.edit_original_response(
+                        content="Player killed."
+                    )
 
                 if target_id == user_id:
                     message = random.choice(item_data["self_kill_messages"])
                 else:
                     message = random.choice(item_data["kill_messages"])
 
+                allowed_channel_id = ROOMS[current_room]["command_channel_id"]
+
                 # Get the channel and send the message if it exists
                 allowed_channel = interaction.guild.get_channel(allowed_channel_id)
+
+                if allowed_channel is None:
+                    allowed_channel = interaction.guild.get_thread(allowed_channel_id)
+
                 if allowed_channel:
                     await allowed_channel.send(
                         message.format(
@@ -608,7 +641,7 @@ def setup_commands(bot):
                 target_member = interaction.guild.get_member(int(target_id))
                 if target_member:
                     await target_member.send(
-                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname} thr {user_role}, whom killed you with the {item_data["name"]}.\nYou become forgotten from the history books."
+                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname} the {user_role}, whom killed you with the {item_data["name"]}.\n## You become forgotten from the history books."
                     )
         
         if target_type == "none":
@@ -622,7 +655,7 @@ def setup_commands(bot):
 
             players[user_id]["inventory"].remove(item)
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "The item withers away from your very own eyes.",
                 ephemeral=True
             )
@@ -639,7 +672,7 @@ def setup_commands(bot):
        
     @bot.tree.command(
     name="take", 
-    description="Pick up an item from the room you are in."
+    description="(PLAYER) Pick up an item from the room you are in."
     )
 
     @app_commands.autocomplete(
@@ -659,12 +692,13 @@ def setup_commands(bot):
             return
 
         current_room = players[user_id]["room"]
-        
+
         allowed_channel_id = ROOMS[current_room]["command_channel_id"]
-        
-        allowed_channel = interaction.guild.get_channel(
-                allowed_channel_id
-        )
+
+        allowed_channel = interaction.guild.get_channel(allowed_channel_id)
+
+        if allowed_channel is None:
+            allowed_channel = interaction.guild.get_thread(allowed_channel_id)
 
         if interaction.channel.id != allowed_channel_id:
 
@@ -682,8 +716,10 @@ def setup_commands(bot):
             )
             return
 
-        item_in_room = any(i["id"] == item for i in room_items[current_room])
-        if not item_in_room:
+        item_on_floor = any(i["id"] == item for i in room_items[current_room])
+        item_from_room = item in ROOMS[current_room]["take_items"]
+
+        if not item_on_floor and not item_from_room:
             await interaction.response.send_message(
                 "That item isn't here.",
                 ephemeral=True
@@ -697,7 +733,7 @@ def setup_commands(bot):
             ephemeral=True
         )
 
-        if item_in_room:
+        if item_on_floor:
 
             for i, room_item in enumerate(room_items[current_room]):
                 if room_item["id"] == item:
@@ -724,7 +760,7 @@ def setup_commands(bot):
 
     @bot.tree.command(
     name="give",
-    description="Give an item from your inventory to another player."
+    description="(PLAYER) Give an item from your inventory to another player."
     )
 
     @app_commands.autocomplete(
@@ -746,7 +782,7 @@ def setup_commands(bot):
             return
 
         current_room = players[user_id]["room"]
-        
+
         allowed_channel_id = ROOMS[current_room]["command_channel_id"]
         
         if interaction.channel.id != allowed_channel_id:
@@ -757,6 +793,8 @@ def setup_commands(bot):
             return
         
         if item not in players[user_id]["inventory"]:
+
+
             await interaction.response.send_message(
                 "You don't have that item.",
                 ephemeral=True
@@ -801,7 +839,7 @@ def setup_commands(bot):
 
     @bot.tree.command(
     name="inspect",
-    description="Read the description of an item in your inventory."
+    description="(PLAYER) Read the description of an item in your inventory."
     )
 
     @app_commands.autocomplete(
@@ -843,7 +881,60 @@ def setup_commands(bot):
             message += f"\n\n---\n{ITEMS[item]['text']}"
 
         await interaction.response.send_message(message, ephemeral=True)
-    
+
+    @bot.tree.command(
+        name="me",
+        description="(PLAYER) Get general information about you."
+    )
+
+    async def me(
+            interaction: discord.Interaction
+    ):
+
+        user_id = str(interaction.user.id)
+
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        player = players[user_id]
+
+        #statuses = (
+        #    ", ".join(player["status"])
+        #    if player["status"]
+        #    else "None"
+        #)
+
+        # keeping this in the code till i have status effects
+
+        role = player["role"].lower()
+
+        if role == "murderer":
+            coins = player["coins"]
+
+        role_hint = {
+            "murderer":
+                "eliminate every innocent passenger.",
+            "vigilante":
+                "protect the train and stop the murderers.",
+            "passenger":
+                "survive until the journey ends.",
+        }
+
+        await interaction.response.send_message(
+            f"""# Information
+
+        You are {player["nickname"]}, the {role}.
+        You are also currently staying in the {player["room"]}.
+        {"Since you are the murderer, you have", coins, "coins up your stash." if role == "murderer" else ""}
+
+        Your objective is to {role_hint[player["role"]]}
+
+        Good luck aboard the Harpy Express.""",
+            ephemeral=True
+        )
+
     # ---- DEBBUGING COMMANdS ----
     @bot.tree.command(name="myroom")
     async def myroom(interaction: discord.Interaction):

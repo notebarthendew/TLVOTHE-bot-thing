@@ -9,6 +9,13 @@ def setup_commands(bot):
 
   START_TIME = time.time()
 
+  async def roulette_number_autocomplete(interaction, current: str):
+      return [
+          app_commands.Choice(name=str(i), value=i)
+          for i in range(37)
+          if current in str(i)
+      ][:25]
+
   @bot.tree.command(name="ping")
   async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("Pong!")
@@ -146,8 +153,232 @@ def setup_commands(bot):
   async def sus(interaction: discord.Interaction):
       await interaction.response.send_message(":face_with_raised_eyebrow:")
 
+  @bot.tree.command(name="gamble", description="LET IT RIDE!")
+  @app_commands.choices(color=[
+      app_commands.Choice(name="Red", value="red"),
+      app_commands.Choice(name="Black", value="black"),
+      app_commands.Choice(name="Green", value="green")
+  ])
+  @app_commands.autocomplete(
+      number=roulette_number_autocomplete
+  )
+
+  async def gamble(
+          interaction: discord.Interaction,
+          money: int,
+          number: int | None = None,
+          color: app_commands.Choice[str] | None = None,
+          ):
+
+      RED = {
+          1, 3, 5, 7, 9,
+          12, 14, 16, 18,
+          19, 21, 23, 25, 27,
+          30, 32, 34, 36
+      }
+
+      BLACK = {
+          2, 4, 6, 8, 10,
+          11, 13, 15, 17,
+          20, 22, 24, 26, 28,
+          29, 31, 33, 35
+      }
+
+      if number is None and color is None:
+          await interaction.response.send_message(
+              "You have to bet on either a number or a color.",
+              ephemeral=True
+          )
+          return
+
+      if number is not None:
+
+          if number < 0 or number > 36:
+              await interaction.response.send_message(
+                  "That isn't a valid roulette number, choose between 0 and 36.",
+                  ephemeral=True
+              )
+              return
+
+          if color is not None:
+
+              if number == 0 and color.value != "green":
+                  await interaction.response.send_message(
+                      "0 is always green.",
+                      ephemeral=True
+                  )
+                  return
+
+              if number in RED and color.value != "red":
+                  await interaction.response.send_message(
+                      f"{number} is red, not {color.value}.",
+                      ephemeral=True
+                  )
+                  return
+
+              if number in BLACK and color.value != "black":
+                  await interaction.response.send_message(
+                      f"{number} is black, not {color.value}.",
+                      ephemeral=True
+                  )
+                  return
+
+              if number is None and color is None:
+                  await interaction.response.send_message(
+                      "You have to bet on something.",
+                      ephemeral=True
+                  )
+                  return
+
+      if number is not None and color is not None:
+          bet = f"{number} {color.value}"
+
+      elif number is not None:
+          bet = f"{number}"
+
+      elif color is not None:
+          bet = color.value
+
+      if number == 17:
+
+          await interaction.response.send_message(
+              f"{interaction.user.mention}, **17 Black**!\n*The roulette starts to spin.*",
+          )
+
+          if random.random() < 0.80:
+              result = 17
+          else:
+              result = random.choice(
+                  [n for n in range(37) if n != 17]
+              )
+
+          await asyncio.sleep(1.5)
+
+          await interaction.followup.send("LET IT RIDE!")
+
+      else:
+          result = random.randint(0, 36)
+          await interaction.response.send_message(
+              f"*{interaction.user.mention} bet {money}$ on **{bet}** and the roulette starts to spin.*",
+          )
+
+      if result == 0:
+          result_color = "green"
+      elif result in RED:
+          result_color = "red"
+      else:
+          result_color = "black"
+
+      won = False
+
+      if number is not None:
+          if result == number:
+              won = True
+
+      elif color is not None:
+          if result_color == color.value:
+              won = True
+
+      await asyncio.sleep(4)
+
+      if won:
+
+          if number is not None:
+              winnings = money * 36
+
+          elif color is not None and color.value == "green":
+              winnings = money * 36
+
+          else:
+              winnings = money * 2
+
+          EXCUSES = [
+
+              "Your mother insisted on holding onto your winnings for 'safe keeping.' Nobody has seen the money since.",
+
+              "The conductor congratulates you before quietly pocketing the money.",
+
+              "The cashier remembers they left the prize money in another carriage.",
+
+              "Unfortunately, the railway's budget was spent replacing windows after... an incident.",
+
+              "A seagull swooped in and stole your winnings. The staff applauds its precision.",
+
+              "The accountant looked at the numbers, sighed, and walked out.",
+
+              "The Harpy Express Gambling Commission has declared your victory 'financially inconvenient.'",
+
+              "Your winnings were taxed at 100% for existing.",
+
+              "The casino claims your chips were 'commemorative' and hold sentimental value instead.",
+
+              "The dealer says you definitely won, but asks you to imagine receiving the money.",
+
+              "The money was accidentally loaded onto another train.",
+
+              "Your prize was converted into company shares. The company went bankrupt five seconds later.",
+
+              "A passenger loudly claimed the winnings belonged to them. Nobody questioned it.",
+
+              "The conductor spent your prize on more coal. The train thanks you for your contribution.",
+
+              "The railway apologizes, but the vault is currently out of money.",
+
+              "The wheel landed on your number, but the dealer insists everyone saw something else.",
+
+              "A very official-looking gentleman stamped your winnings with 'DENIED.'",
+
+              "Your prize has been donated to the 'Definitely Not Funding Murder' foundation.",
+
+              "Someone replaced the cash with Monopoly money overnight.",
+
+              "The train's financial department has been temporarily eaten by paperwork.",
+
+              "The dealer flips the table over before anyone can pay you.",
+
+              "You receive your winnings in exposure.",
+
+              "The cashier says they'll pay you 'next round.'",
+
+              "Your winnings have been successfully mailed to an unknown address.",
+
+              "The railway invested your money into a revolutionary invisible locomotive.",
+
+              "Your money was last seen rolling down the tracks.",
+
+              "The conductor gives you a thumbs up instead of cash.",
+
+              "The casino's wallet is currently on cooldown. You will get it later I'm sure!",
+
+              "The dealer gives you a mysterious note simply reads: 'Nuh uh.'",
+
+              "The dealer congratulates you, then immediately forgets who you are."
+
+          ]
+
+          await interaction.followup.send(
+              f"*The wheel finally stopped spinning, and out came **{result} {result_color}**.*\n"
+              f"## {interaction.user.mention} won {winnings}$!!!!!!!"
+          )
+
+          print(f"{interaction.user} won {winnings}")
+
+          await asyncio.sleep(5)
+
+          await interaction.followup.send(f"{random.choice(EXCUSES)}")
+
+
+
+      else:
+          await interaction.followup.send(
+              f"*The wheel finally stopped spinning, and out came **{result} {result_color}**.*\n"
+              f"## {interaction.user.mention} lost the only {money}$ on their bank account."
+          )
+          print(f"{interaction.user} lost {money}")
+
   @bot.tree.command(name="uptime")
   async def uptime(interaction: discord.Interaction):
+
       seconds = int(time.time() - START_TIME)
 
       days, seconds = divmod(seconds, 86400)

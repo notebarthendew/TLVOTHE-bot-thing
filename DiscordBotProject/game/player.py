@@ -35,16 +35,17 @@ def load_players():
         players.clear()
         save_players()
 
-def create_player(user_id, nickname, spawn_room):
+def create_player(user_id, nickname, role, spawn_room):
 
     players[user_id] = {
         "room": spawn_room,
         "alive": True,
-        "role": None,
+        "role": role,
         "inventory": [],
         "status": [],
         "cooldowns": {},
         "edge_warnings": 0,
+        "coins": 0,
         "nickname": nickname
     }
     print(f"Created player: {user_id}")

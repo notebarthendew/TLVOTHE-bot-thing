@@ -2,6 +2,9 @@
 from discord import app_commands
 import discord
 
+import random
+import asyncio
+
 from game.player import players, create_player, remove_player, save_players
 from game.items import ITEMS
 from utils.constants import ADMIN_ROLE_ID
@@ -27,6 +30,33 @@ def setup_commands(bot):
             )
             for room_id in ROOMS.keys()
             if current.lower() in room_id.lower()
+        ][:25]
+
+    async def role_autocomplete(
+        interaction,
+        current: str
+    ):
+        return [
+            app_commands.Choice(
+                name=f"Passenger",
+                value="passenger"
+            ),
+
+            app_commands.Choice(
+                name=f"Vigilante",
+                value="vigilante"
+            ),
+
+            app_commands.Choice(
+                name=f"Murderer",
+                value="murderer"
+            ),
+
+            app_commands.Choice(
+                name=f"None",
+                value="none"
+            )
+
         ][:25]
 
     async def item_autocomplete(
@@ -77,10 +107,270 @@ def setup_commands(bot):
             if pid != user_id and pdata["room"] == current_room
             and current.lower() in pdata["nickname"].lower()
         ][:25]
-    
+
+    @bot.tree.command(
+        name="startgame",
+        description="(ADMIN) Starts a game of TLVOTHE."
+    )
+
+    async def startgame(interaction: discord.Interaction):
+
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        alive_players = [
+            pid for pid in players
+            if players[pid]["alive"]
+        ]
+
+        role_pool = alive_players.copy()
+
+        if len(alive_players) < 5:
+            await interaction.edit_original_response(
+                content="You need at least 5 players."
+            )
+            return
+
+        random.shuffle(role_pool)
+
+        murderers = [
+            role_pool.pop(),
+            role_pool.pop()
+        ]
+
+        vigilantes = [
+            role_pool.pop(),
+            role_pool.pop(),
+            role_pool.pop()
+        ]
+
+        for pid in role_pool:
+            players[pid]["role"] = "passenger"
+
+        for pid in murderers:
+            players[pid]["role"] = "murderer"
+
+        for pid in vigilantes:
+            players[pid]["role"] = "vigilante"
+
+        for pid in alive_players:
+
+            role = players[pid]["role"]
+
+            if role == "murderer":
+                players[pid]["inventory"] = ["keys"]
+
+            elif role == "vigilante":
+                players[pid]["inventory"] = ["keys", "gun"]
+
+            else:
+                players[pid]["inventory"] = ["keys"]
+
+
+        SPAWN_ROOMS = [
+            "front",
+            "cafeteria",
+            "library",
+            "infirmary",
+            "front_dorm",
+            "mid_dorm",
+            "back_dorm",
+        ]
+
+        for pid in alive_players:
+
+            spawn_room = random.choice(SPAWN_ROOMS)
+
+            role = players[pid]["role"]
+
+            players[pid]["room"] = spawn_room
+
+            member = interaction.guild.get_member(int(pid))
+
+            lobby_channel = interaction.guild.get_channel(
+                ROOMS["train_dock"]["channel_id"]
+            )
+
+            if lobby_channel is None:
+                lobby_channel = interaction.guild.get_thread(
+                    ROOMS["train_dock"]["channel_id"]
+                )
+
+            spawn_channel = interaction.guild.get_channel(
+                ROOMS[spawn_room]["channel_id"]
+            )
+
+            if spawn_channel is None:
+                spawn_channel = interaction.guild.get_thread(
+                    ROOMS[spawn_room]["channel_id"]
+                )
+
+            if lobby_channel is not None:
+                await lobby_channel.set_permissions(
+                    member,
+                    view_channel=False
+                )
+
+            # Show their spawn room
+            if spawn_channel is not None:
+                await spawn_channel.set_permissions(
+                    member,
+                    view_channel=True
+                )
+
+            save_players()
+
+            ROLE_OBJECTIVES = {
+
+                "murderer":
+                    "Eliminate all passengers along your with Co-hort before time runs out.",
+
+                "vigilante":
+                    "Eliminate any murderers and protect the passengers.",
+
+                "passenger":
+                    "Stay safe and survive till the end of the ride.",
+
+                "bodyguard":
+                    "Protect your assigned passenger at all costs.",
+
+                "detective":
+                    "Use your clues to uncover the murderer's identity."
+
+            }
+
+            print(f"Sending DM to {member} ({pid})")
+            print(member)
+            print(member.guild.name)
+
+
+            try:
+                await member.send(
+                    f"""# Welcome aboard, **{role.upper()}!**
+
+            -.-.-.-.-.-.-.-.-.-
+
+            There are 2 killers aboard the train.
+
+            {ROLE_OBJECTIVES[role]}
+            """
+                )
+                print(f"DM sent to {member}")
+
+            except Exception as e:
+                print(f"Couldn't DM {member}: {e}")
+
+        await interaction.edit_original_response(
+            content="Game started!"
+        )
+
+    @bot.tree.command(
+        name="info",
+        description="(ADMIN) View all player information."
+    )
+    async def info(interaction: discord.Interaction):
+
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        pages = []
+        current = "# Player Information\n\n"
+
+        for pid, pdata in players.items():
+
+            member = interaction.guild.get_member(int(pid))
+
+            username = member.name if member else "Unknown"
+
+            line = (
+                f"**{pdata['nickname']}** "
+                f"({username})\n"
+                f"ID: `{pid}` | "
+                f"{'🟢' if pdata['alive'] else '🔴'} | "
+                f"**{pdata['role'] or 'None'}** | "
+                f"📍 {pdata['room']} | "
+                f"🎒 {', '.join(pdata['inventory']) if pdata['inventory'] else 'Empty'}\n\n"
+            )
+
+            if len(current) + len(line) > 1900:
+                pages.append(current)
+                current = ""
+
+            current += line
+
+        if current:
+            pages.append(current)
+
+        await interaction.response.send_message(
+            pages[0],
+            ephemeral=True
+        )
+
+        for page in pages[1:]:
+            await interaction.followup.send(
+                page,
+                ephemeral=True
+            )
+
+    @bot.tree.command(
+        name="say",
+        description="(snowy dodo only hah) Make the bot say something."
+    )
+
+    async def say(
+            interaction: discord.Interaction,
+            message: str
+    ):
+
+        if interaction.user.id != 1087129816416919613:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        typing_time = min(
+            random.uniform(0.5, 1.2) + len(message) * random.uniform(0.02, 0.05),
+            8
+        )
+
+        async with interaction.channel.typing():
+            await asyncio.sleep(typing_time)
+
+        await interaction.channel.send(message)
+
+        await interaction.followup.send(
+            "Sent.",
+            ephemeral=True
+        )
+
     @bot.tree.command(
         name="add",
-        description="Add a player to the game"
+        description="(ADMIN) Add a player to the game"
     )
 
     @app_commands.describe(
@@ -88,6 +378,7 @@ def setup_commands(bot):
     )
 
     @app_commands.autocomplete(
+        role=role_autocomplete,
         spawn_room=room_autocomplete
     )
 
@@ -95,6 +386,7 @@ def setup_commands(bot):
         interaction: discord.Interaction,
         member: discord.Member,
         nickname: str,
+        role: str,
         spawn_room: str
     ):
 
@@ -136,7 +428,7 @@ def setup_commands(bot):
         
         # Create player
         print("ADD COMMAND REACHED")
-        create_player(user_id, nickname, spawn_room)
+        create_player(user_id, nickname, role, spawn_room)
 
         # Give game role
         game_role = interaction.guild.get_role(
@@ -161,7 +453,7 @@ def setup_commands(bot):
 
     @bot.tree.command(
         name="remove",
-        description="Remove a player from the game (aka admin /kill)"
+        description="(ADMIN) Remove a player from the game"
     )
 
     @app_commands.describe(

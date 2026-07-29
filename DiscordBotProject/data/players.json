@@ -2,14 +2,36 @@
     "1087129816416919613": {
         "room": "4",
         "alive": true,
-        "role": null,
+        "role": "murderer",
         "inventory": [
-            "soda",
-            "newspaper_1"
+            "knife"
         ],
         "status": [],
         "cooldowns": {},
         "edge_warnings": 0,
+        "coins": 100,
         "nickname": "Snowy"
+    },
+    "1492309919461019749": {
+        "room": "4",
+        "alive": true,
+        "role": "murderer",
+        "inventory": [],
+        "status": [],
+        "cooldowns": {},
+        "edge_warnings": 0,
+        "coins": 0,
+        "nickname": "Dummy"
+    },
+    "1505704982933016716": {
+        "room": "4",
+        "alive": false,
+        "role": "passenger",
+        "inventory": [],
+        "status": [],
+        "cooldowns": {},
+        "edge_warnings": 0,
+        "coins": 0,
+        "nickname": "Grand Master"
     }
 }

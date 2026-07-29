@@ -9,6 +9,7 @@ from utils.constants import (
     ROOM5_ID,
     ROOM6_ID,
     ROOM6_THREAD_ID,
+    TRAIN_DOCK_ID,
     COCKPIT_ID,
     OUTSIDE_FRONT_ID,
     FRONT_ID,
@@ -32,6 +33,20 @@ from utils.constants import (
 )
 
 ROOMS = {
+
+    "train_dock": {
+        "channel_id": TRAIN_DOCK_ID,
+        "command_channel_id": TRAIN_DOCK_ID,
+        "front": None,
+        "back": None,
+        "look_descriptions": [
+            "A food tray sits ready for passengers. Finally, something normal on this train.",
+            "Tables, chairs, and a large food tray waiting to be served. Everyone gathers here eventually.\nThat is either convenient or terrifying.",
+            "The cafeteria provides meals, conversations, and the perfect place for everyone to stop eating when someone starts accusing another person."
+        ],
+        "take_items": []
+    },
+
 
     "cockpit": {
         "channel_id": COCKPIT_ID,

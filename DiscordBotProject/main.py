@@ -70,13 +70,17 @@ STATUSES = [
     "AND THEY LIKE TO KILL!", 
     "Why is there blood outside of medbay?" # the 3 of these are amongus show refs
     "Don't trust Cabin 6.",
+    "JOIN THE NINTENDO FUN CLUB TODAY!!!",
+    "Step it up Mac! Where's your hustle?",
+    "Training with Doc Louis...",
+    "Suing the WVBA...", # 4 of these are Punch-Out!! refs
 
     # Meta
     "Testing the train brakes...",
     "Syncing slash commands...",
     "Waiting for someone to type /look...",
     "Reading the documentation...",
-    "Being hosted on Railway.",
+    "Being hosted on a potato pc.",
     "Wondering where Fork went.",
     "Debugging another murder."
     "Conducting the Harpy Express...",
