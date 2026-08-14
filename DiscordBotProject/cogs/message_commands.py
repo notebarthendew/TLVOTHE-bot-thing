@@ -13,5 +13,5 @@ class MessageCommands(commands.Cog):
         print(f"{message.author}: {message.content}")
 
 
-async def setup_commands(bot):
-    await bot.add_cog(MessageCommands(bot))
+def setup_commands(bot):
+    bot.add_listener(MessageCommands(bot).on_message)

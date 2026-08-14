@@ -68,7 +68,7 @@ STATUSES = [
     "everyones dead.",
     "ALIENS ARE REAL!...",
     "AND THEY LIKE TO KILL!", 
-    "Why is there blood outside of medbay?" # the 3 of these are amongus show refs
+    "Why is there blood outside of medbay?", # the 3 of these are amongus show refs
     "Don't trust Cabin 6.",
     "JOIN THE NINTENDO FUN CLUB TODAY!!!",
     "Step it up Mac! Where's your hustle?",
@@ -82,7 +82,7 @@ STATUSES = [
     "Reading the documentation...",
     "Being hosted on a potato pc.",
     "Wondering where Fork went.",
-    "Debugging another murder."
+    "Debugging another murder.",
     "Conducting the Harpy Express...",
     "Keeping the train on the tracks...",
     "Please mind the gap.",

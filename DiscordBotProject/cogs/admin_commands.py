@@ -199,6 +199,9 @@ def setup_commands(bot):
 
             member = interaction.guild.get_member(int(pid))
 
+            if member is None:
+                continue
+
             lobby_channel = interaction.guild.get_channel(
                 ROOMS["train_dock"]["channel_id"]
             )
@@ -321,6 +324,13 @@ def setup_commands(bot):
 
         if current:
             pages.append(current)
+
+        if not pages:
+            await interaction.response.send_message(
+                "There are no players in the game.",
+                ephemeral=True
+            )
+            return
 
         await interaction.response.send_message(
             pages[0],
@@ -592,6 +602,7 @@ def setup_commands(bot):
             return
 
         players[user_id]["inventory"].append(item)
+        save_players()
 
         target_nickname = players[user_id]["nickname"]
         await interaction.response.send_message(

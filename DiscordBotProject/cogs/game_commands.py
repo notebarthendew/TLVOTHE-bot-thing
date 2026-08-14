@@ -538,15 +538,6 @@ def setup_commands(bot):
 
             target_id = target
 
-            target_member = interaction.guild.get_member(int(target_id))
-
-            if target_member is None:
-                await interaction.response.send_message(
-                    "That Discord member couldn't be found.",
-                    ephemeral=True
-                )
-                return
-            
             if target_id not in players:
 
                 await interaction.response.send_message(
@@ -554,6 +545,22 @@ def setup_commands(bot):
                     ephemeral=True
                 )
 
+                return
+
+            if players[target_id]["room"] != current_room:
+                await interaction.response.send_message(
+                    "That player is not in this room.",
+                    ephemeral=True
+                )
+                return
+
+            target_member = interaction.guild.get_member(int(target_id))
+
+            if target_member is None:
+                await interaction.response.send_message(
+                    "That Discord member couldn't be found.",
+                    ephemeral=True
+                )
                 return
 
             target_nickname = players[target_id]["nickname"]
@@ -574,7 +581,9 @@ def setup_commands(bot):
             
             if action == "kill":
 
-                if user_role == "passenger" or user_role == "vigilante" and item == "knife" and target != "Yourself":
+                if user_role == "passenger" or (
+                    user_role == "vigilante" and item == "knife" and target_id != user_id
+                ):
 
                     await interaction.response.send_message(
                         f"You can't bring yourself to kill {target_nickname}.",
@@ -824,6 +833,13 @@ def setup_commands(bot):
             )
             return
 
+        if players[target_id]["room"] != current_room:
+            await interaction.response.send_message(
+                "That player is not in this room.",
+                ephemeral=True
+            )
+            return
+
         players[user_id]["inventory"].remove(item)
         players[target_id]["inventory"].append(item)
         save_players()
@@ -908,10 +924,7 @@ def setup_commands(bot):
 
         # keeping this in the code till i have status effects
 
-        role = player["role"].lower()
-
-        if role == "murderer":
-            coins = player["coins"]
+        role = (player["role"] or "none").lower()
 
         role_hint = {
             "murderer":
@@ -922,14 +935,20 @@ def setup_commands(bot):
                 "survive until the journey ends.",
         }
 
+        coin_text = (
+            f"Since you are the murderer, you have {player['coins']} coins in your stash."
+            if role == "murderer"
+            else ""
+        )
+
         await interaction.response.send_message(
             f"""# Information
 
         You are {player["nickname"]}, the {role}.
         You are also currently staying in the {player["room"]}.
-        {"Since you are the murderer, you have", coins, "coins up your stash." if role == "murderer" else ""}
+        {coin_text}
 
-        Your objective is to {role_hint[player["role"]]}
+        Your objective is to {role_hint.get(role, "wait for the game to assign your role.")}
 
         Good luck aboard the Harpy Express.""",
             ephemeral=True
