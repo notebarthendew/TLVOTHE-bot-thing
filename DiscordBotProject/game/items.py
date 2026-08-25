@@ -14,7 +14,7 @@ ITEMS = {
 
         "consumable": False,
 
-        "cooldown": 60 * 60 * 8, # eit horcus
+        "cooldown": 60 * 60 * 0.1, # eit horcus
         
         "target_type": "player",
 
@@ -116,7 +116,7 @@ ITEMS = {
 
         "action": "kill",
 
-        "cooldown": 60 * 60 * 5, # fiv horcus
+        "cooldown": 60 * 60 * 0.1, # fiv horcus
 
         "kill_messages": [
 
@@ -189,7 +189,7 @@ ITEMS = {
 
         "action": "protect",
         
-        "cooldown": 60 * 60 * 5 # fiv horcus
+        "cooldown": 60 * 60 * 0.1# fiv horcus
         
     },
 
@@ -262,11 +262,13 @@ ITEMS = {
             "A very delectable an modern soda, using an elongated soup can to store it's cherry flavour.\nTruly one of the inventions of the era!\n-# Don't mind that the liquid shoots out in one direction when you open it."
         ),
 
-        "usable": False,
+        "text": "<:CherrySoda:1527067200748261386> You crack the can open. The liquid immediately sprays out in one direction... and it never stops.\nYou stand there, drenched, watching a physically impossible amount of cherry soda pour out of a can that should've run dry ten seconds ago.",
+
+        "usable": True,
 
         "consumable": True,
 
-        "target_type": "na"
+        "target_type": "none"
 
     },
 

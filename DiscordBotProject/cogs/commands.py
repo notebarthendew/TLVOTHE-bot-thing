@@ -392,7 +392,7 @@ def setup_commands(bot):
 
   @bot.tree.command(name="commands")
   async def commands(interaction: discord.Interaction):
-    await interaction.response.send_message(" # TVLOTHE BOT COMMANDS\n"
+    await interaction.response.send_message(" # TLVOTHE BOT COMMANDS\n"
                                             "## Slash Commands\n"
                                             "* '/ping' Send pong.\n"
                                             "* '/d20roll' Roll a dice of 20 sides.\n"
@@ -409,7 +409,7 @@ def setup_commands(bot):
 
   @bot.tree.command(name="game_commands")
   async def game_commands(interaction: discord.Interaction):
-    await interaction.response.send_message(" # TVLOTHE BOT *GAME* COMMANDS\n"
+    await interaction.response.send_message(" # TLVOTHE BOT *GAME* COMMANDS\n"
                                             "*You are able to use these commands if you are in the game.*\n"
                                             "## Actions\n"
                                             "* '/move' Move around the train, only able to move linearly (Front or Back)\n"

@@ -181,8 +181,8 @@ Current implemented/planned systems:
 [+] Administrative tools
 [+] Inventory system
 [+] Basic item system
-[ ] Final train map
-[ ] Role assignment
+[+] Final train map
+[+] Role assignment
 [ ] Evidence system
 [ ] Sound propagation
 [ ] Corpse system
@@ -197,3 +197,17 @@ This project is currently in active development.
 
 Game systems, balance, roles, mechanics, and structure may change over time.
   
+----- RECENT UPDATES -----
+
+- Persistent storage: game state now persists to data/game.json; players and room items persist to data/players.json and data/room_items.json. The bot loads these on startup.
+
+- Player emoji: players can have an emoji attached (stored in their player entry). Emoji appear next to nicknames in chat and admin views; autocompletes still show only nicknames.
+
+- Gun-drop behavior: when a non-murderer kills an innocent with a gun, the killer drops the gun to the floor; the killer gets a "picked_up_gun" flag preventing them from immediately picking that gun back up.
+
+- Move cooldown: players have a 10-second cooldown between moves (stored in the player's cooldowns dict) to prevent infinite juking.
+
+- Large-end-message handling: the game end announcement splits into multiple messages if it's too large for a single Discord message.
+
+These are implemented in the code (see game/game_state.py, game/player.py, game/room_items.py, cogs/game_commands.py, cogs/admin_commands.py).
+

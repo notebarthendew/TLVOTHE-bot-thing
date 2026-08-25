@@ -1,37 +1,35 @@
 {
     "1087129816416919613": {
-        "room": "4",
+        "room": "cockpit",
         "alive": true,
-        "role": "murderer",
+        "role": "Murderer",
         "inventory": [
+            "knife",
+            "gun",
+            "poisonbottle",
             "knife"
         ],
         "status": [],
-        "cooldowns": {},
+        "cooldowns": {
+            "__horn__": 1787169229.4069252
+        },
         "edge_warnings": 0,
-        "coins": 100,
-        "nickname": "Snowy"
+        "coins": 150,
+        "picked_up_gun": false,
+        "nickname": "Snowy",
+        "emoji": null
     },
-    "1492309919461019749": {
-        "room": "4",
+    "1382568243021086770": {
+        "room": "cockpit",
         "alive": true,
-        "role": "murderer",
+        "role": "none",
         "inventory": [],
         "status": [],
         "cooldowns": {},
         "edge_warnings": 0,
         "coins": 0,
-        "nickname": "Dummy"
-    },
-    "1505704982933016716": {
-        "room": "4",
-        "alive": false,
-        "role": "passenger",
-        "inventory": [],
-        "status": [],
-        "cooldowns": {},
-        "edge_warnings": 0,
-        "coins": 0,
-        "nickname": "Grand Master"
+        "picked_up_gun": false,
+        "nickname": "Nerion",
+        "emoji": null
     }
 }

@@ -1,8 +1,10 @@
 import random
 import time
 from collections import Counter
+import asyncio
 
 from discord import app_commands
+from discord import ButtonStyle
 import discord
 
 from game.player import players, create_player, save_players, kill_player
@@ -14,10 +16,93 @@ from utils.constants import DEAD_ROLE_ID
 from utils.helpers import check_player_status
 from utils.helpers import format_time
 from game.map import ROOMS
-from game.room_items import room_items
+from game.room_items import room_items, save_room_items
+from game.game_state import GAME, register_kill, time_remaining
+from game.room_visibility import set_player_room
+from game.sound import notify_sound, notify_global
 
 
 def setup_commands(bot):
+
+    class LoreFollowUpView(discord.ui.View):
+        @discord.ui.button(label="Tell me more...", style=ButtonStyle.secondary)
+        async def more_lore(self, interaction: discord.Interaction, button: discord.ui.Button):
+            await interaction.response.defer()
+            follow_up_text = "I uh... don't have anythin' else kid. Ah, come back later after I conspire some more."
+
+            await interaction.followup.send(follow_up_text, ephemeral=True)
+
+    class ShopView(discord.ui.View):
+        def __init__(self, user_id: str):
+            super().__init__()
+            self.user_id = user_id
+            user_coins = players[user_id].get("coins", 0)
+
+            # Editable shop offerings: list of tuples (item_id, price)
+            SHOP_OFFERINGS = [
+                ("knife", 200),
+                ("gun", 400),
+                ("poisonbottle", 250),
+            ]
+
+            for item_id, price in SHOP_OFFERINGS:
+                item = ITEMS.get(item_id)
+                if not item:
+                    continue
+                name = item.get("name", item_id)
+                emoji = item.get("emoji", "")
+
+                # Determine button style and disabled state
+                can_afford = user_coins >= price
+                style = ButtonStyle.success if can_afford else ButtonStyle.danger
+
+                button = discord.ui.Button(
+                    label=f"{name} ({price})",
+                    emoji=emoji,
+                    style=style,
+                    custom_id=f"shop_buy_{item_id}",
+                    disabled=not can_afford
+                )
+                button.callback = self._make_callback(item_id, price, name)
+                self.add_item(button)
+
+            # Lore button
+            lore_button = discord.ui.Button(
+                label="What's your name?",
+                style=ButtonStyle.secondary,
+                custom_id="shop_lore"
+            )
+            lore_button.callback = self._lore_callback
+            self.add_item(lore_button)
+
+        async def _lore_callback(self, interaction: discord.Interaction):
+            await interaction.response.defer()
+            lore_text = "Curious are we now? Well then, can't judge someone for asking. The name's Vincent, I live IN the floor basically.\nI know this may be more than what you asked for but I'm here hoping if I'd get somewhere better by sneaking on the train, was easily able to do it too! Those Sirène guys are a bunch of morons they don't even design their stuff properly.\nAnyways that's all I have for now, buy something and stop wastin' my time."
+            await interaction.followup.send(lore_text, view=LoreFollowUpView(), ephemeral=True)
+
+        def _make_callback(self, item_id: str, price: int, name: str):
+            async def callback(interaction: discord.Interaction):
+                await interaction.response.defer()
+                user_id = str(interaction.user.id)
+                user_coins = players[user_id].get("coins", 0)
+
+                if user_coins < price:
+                    await interaction.followup.send(
+                        f"Hey pal, you need {price - user_coins} more of those coins to get that.",
+                        ephemeral=True
+                    )
+                    return
+
+                # Deduct coins and add item
+                players[user_id]["coins"] -= price
+                players[user_id]["inventory"].append(item_id)
+                save_players()
+
+                await interaction.followup.send(
+                    f"Here you go bud, a brand new **{name}** for <:Coin:1512937188751446269> {price}. Use it wisely.",
+                    ephemeral=True
+                )
+            return callback
 
     async def inventory_item_autocomplete(
     interaction,
@@ -132,6 +217,19 @@ def setup_commands(bot):
             await interaction.response.send_message(error, ephemeral=True)
             return
 
+        # Check move cooldown (10 seconds)
+        MOVE_COOLDOWN = 12
+        cooldowns = players[user_id].get("cooldowns", {})
+        now = time.time()
+        
+        if "__move__" in cooldowns and cooldowns["__move__"] > now:
+            remaining = int(cooldowns["__move__"] - now)
+            await interaction.response.send_message(
+                f"You're still catching your breath. Try moving again in **{remaining}** second(s).",
+                ephemeral=True
+            )
+            return
+
         EDGE_WARNINGS = [
 
             "You stop yourself just before stepping off the train.",
@@ -145,6 +243,8 @@ def setup_commands(bot):
         ]
 
         nickname = players[user_id]["nickname"]
+        emoji = players[user_id].get("emoji", "")
+        nickname_display = f"{nickname} ({emoji})" if emoji else nickname
         
         current_room = players[user_id]["room"]
 
@@ -159,11 +259,6 @@ def setup_commands(bot):
 
             return
 
-        old_channel = interaction.guild.get_channel(
-            ROOMS[current_room]["command_channel_id"]
-        )
-
-            
         old_channel_main = interaction.guild.get_channel(
             ROOMS[current_room]["channel_id"]
         )
@@ -208,7 +303,7 @@ def setup_commands(bot):
                 )
 
                 await old_channel_main.send(
-                    f"{nickname} lost their balance and disappeared beneath the train."
+                    f"{nickname_display} lost their balance and disappeared beneath the train."
                 )
 
                 await interaction.user.send(
@@ -218,6 +313,8 @@ def setup_commands(bot):
                 players[user_id]["room"] = "1"
                 players[user_id]["edge_warnings"] = 0
                 save_players()
+
+                await register_kill(interaction.guild)
 
                 return
 
@@ -240,15 +337,12 @@ def setup_commands(bot):
                 ROOMS[result]["command_channel_id"]
             )
         
-        new_channel_main = interaction.guild.get_channel(
-            ROOMS[result]["channel_id"]         
-        )
-
         players[user_id]["edge_warnings"] = 0
+        players[user_id]["cooldowns"]["__move__"] = now + MOVE_COOLDOWN
         save_players()
 
         await interaction.response.send_message(
-            f"*{nickname} moved to the {direction.value} of the train.*",
+            f"*{nickname_display} moved to the {direction.value} of the train.*",
         )
 
         if direction.value == "back":
@@ -256,21 +350,132 @@ def setup_commands(bot):
         else:
             arrival_direction = "back"
 
+        # announce leaving in old room
+        try:
+            if old_channel_main:
+                await old_channel_main.send(f"*{nickname_display} leaves towards the {direction.value} of the train.*")
+        except Exception:
+            pass
+
         await new_channel.send(
-            f"*{nickname} arrives from the {arrival_direction} of the train.*"
-        )
-        
-        await old_channel_main.set_permissions(
-            interaction.user,
-            view_channel=False
+            f"*{nickname_display} arrives from the {arrival_direction} of the train.*"
         )
 
-        await new_channel_main.set_permissions(
-            interaction.user,
-            view_channel=True
-        )
+        # Notify nearby players via DM about the arrival
+        try:
+            await notify_sound(
+                interaction.guild,
+                result,
+                event="arrival",
+                full_message=f"{nickname_display} arrives from the {arrival_direction} of the train.",
+                radius=1,
+                exclude_ids=[user_id],
+            )
+        except Exception:
+            pass
+
+        await set_player_room(interaction.guild, interaction.user, result)
 
     
+    @bot.tree.command(
+    name="horn",
+    description="(PLAYER) Ring the horn (cockpit only)"
+    )
+    
+    async def horn(interaction: discord.Interaction):
+        user_id = str(interaction.user.id)
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        current_room = players[user_id]["room"]
+        if current_room != "cockpit":
+            await interaction.response.send_message(
+                "You must be in the cockpit to ring the horn.",
+                ephemeral=True
+            )
+            return
+
+        # simple cooldown (60s)
+        now = time.time()
+        cooldowns = players[user_id].setdefault("cooldowns", {})
+        if cooldowns.get("__horn__", 0) > now:
+            remaining = int(cooldowns["__horn__"] - now)
+            await interaction.response.send_message(
+                f"The horn is still recharging. Try again in {remaining} second(s).",
+                ephemeral=True
+            )
+            return
+
+        # trigger horn
+        cooldowns["__horn__"] = now + 120
+        save_players()
+
+        await interaction.response.send_message("You pull the horn. A deafening blast rings across the train.", ephemeral=True)
+
+        # DM all players and send a short room announcement
+        try:
+            await notify_global(interaction.guild, "A loud horn blares from the cockpit, echoing through the train.")
+        except Exception:
+            pass
+
+        # broadcast a short message to each room's command channel (best-effort)
+        for room_id, rdata in ROOMS.items():
+            try:
+                chan = interaction.guild.get_channel(rdata["command_channel_id"]) or interaction.guild.get_thread(rdata["command_channel_id"]) 
+                if chan:
+                    await chan.send("A loud horn blares from the cockpit, reverberating through the cars.")
+            except Exception:
+                pass
+
+    @bot.tree.command(
+    name="shop",
+    description="(MURDERER) See various killing items to buy."
+    )
+    async def shop(interaction: discord.Interaction):
+        user_id = str(interaction.user.id)
+        error = check_player_status(user_id)
+
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        if players[user_id]["role"] != "Murderer":
+            await interaction.response.send_message(
+                "no.",
+                ephemeral=True
+            )
+            return
+
+        # Editable shop offerings: list of tuples (item_id, price)
+        SHOP_OFFERINGS = [
+            ("knife", 200),
+            ("gun", 400),
+            ("poisonbottle", 250),
+        ]
+
+        user_coins = players[user_id].get("coins", 0)
+        lines = ["# Black Market", "-.-.-.-.-.-.-.-.-.",'"Hey there, welcome to the shop for all weapons and stuff. Tell me if you would like to buy anything here for any porpuse."']
+        lines.append(f"**Your coins:** <:Coin:1512937188751446269> {user_coins}")
+        lines.append("")
+        
+        for item_id, price in SHOP_OFFERINGS:
+            item = ITEMS.get(item_id)
+            if not item:
+                continue
+            name = item.get("name", item_id)
+            emoji = item.get("emoji", "")
+            desc = item.get("description", "")
+            affordable = "✅" if user_coins >= price else "❌"
+            lines.append(f"{affordable} {emoji} **{name}** - <:Coin:1512937188751446269> {price}")
+            if desc:
+                lines.append(f"--- {desc}")
+
+        message = "\n".join(lines)
+        view = ShopView(user_id)
+        await interaction.response.send_message(message, view=view, ephemeral=True)
+
     @bot.tree.command(
     name="look",
     description="(PLAYER) 👀"
@@ -284,6 +489,8 @@ def setup_commands(bot):
         if error:
             await interaction.response.send_message(error, ephemeral=True)
             return
+        
+        await interaction.response.defer(ephemeral=True)
 
         current_room = players[user_id]["room"]
         room_data = ROOMS[current_room]
@@ -308,16 +515,19 @@ def setup_commands(bot):
             if player_data["room"] != current_room:
                 continue
 
+            player_emoji = player_data.get("emoji", "")
+            nickname_with_emoji = f"{player_data['nickname']} ({player_emoji})" if player_emoji else player_data["nickname"]
+
             if player_data["alive"]:
 
                 people_in_room.append(
-                    player_data["nickname"]
+                    nickname_with_emoji
                 )
 
             else:
 
                 corpses_in_room.append(
-                    player_data["nickname"]
+                    nickname_with_emoji
                 )
 
         if not people_in_room:
@@ -387,15 +597,14 @@ def setup_commands(bot):
 
         look_message = random.choice(look_messages)
         
-        await interaction.response.send_message(
-            f"## {look_message}\n"
+        await interaction.edit_original_response(
+            content=f"## {look_message}\n"
             "-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n"
             f"{description}\n-.-.-.-.-.-.-.-.-.-.-\n\n"
             f"People here:\n{people_text}\n\n"
             f"{corpse_section}"
             f"{items_section}"
-            f"Exits:\n{exits_text}",
-            ephemeral=True
+            f"Exits:\n{exits_text}"
         )
 
     @bot.tree.command(name="inventory",description="Check your inventory.")
@@ -412,10 +621,17 @@ def setup_commands(bot):
         
         if player_inventory:
             item_counts = Counter(player_inventory)
+            cooldowns = players[user_id]["cooldowns"]
+            now = time.time()
 
             inventory_text = "\n".join(
                 f"- {ITEMS[item]['name']} ({ITEMS[item]['emoji']})"
                 + (f" x{count}" if count > 1 else "")
+                + (
+                    f" — cooldown: {format_time(int(cooldowns[item] - now))}"
+                    if cooldowns.get(item, 0) > now
+                    else ""
+                )
                 for item, count in item_counts.items()
             )
         else:
@@ -564,7 +780,13 @@ def setup_commands(bot):
                 return
 
             target_nickname = players[target_id]["nickname"]
+            target_emoji = players[target_id].get("emoji", "")
+            target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
+            
             user_nickname = players[user_id]["nickname"]
+            user_emoji = players[user_id].get("emoji", "")
+            user_display = f"{user_nickname} ({user_emoji})" if user_emoji else user_nickname
+            
             user_role = players[user_id]["role"]
             target_role = players[target_id]["role"]
 
@@ -586,7 +808,7 @@ def setup_commands(bot):
                 ):
 
                     await interaction.response.send_message(
-                        f"You can't bring yourself to kill {target_nickname}.",
+                        f"You can't bring yourself to kill {target_display}.",
                         ephemeral=True
                     )
 
@@ -595,7 +817,7 @@ def setup_commands(bot):
                 if user_role == "murderer" and target_role == "murderer":
 
                     await interaction.response.send_message(
-                        f"You can't kill {target_nickname}, your murderer co-hort.",
+                        f"You can't kill {target_display}, your murderer co-hort.",
                         ephemeral=True
                     )
 
@@ -614,7 +836,9 @@ def setup_commands(bot):
 
                 save_players()
 
-                if user_role == "murderer":
+                await register_kill(interaction.guild)
+
+                if user_role == "murderer" and target_id != user_id:
                     await interaction.edit_original_response(
                         content="Player killed.\n### You got 100 coins for that!"
                     )
@@ -639,10 +863,63 @@ def setup_commands(bot):
                 if allowed_channel:
                     await allowed_channel.send(
                         message.format(
-                            user=user_nickname,
-                            target=target_nickname
+                            user=user_display,
+                            target=target_display
                         )
                     )
+                    # notify nearby players via DM about the event
+                    try:
+                        full_msg = message.format(user=user_display, target=target_display)
+                        if item == "gun":
+                            # larger radius for gunshots; directional hints for distant players
+                            await notify_sound(
+                                interaction.guild,
+                                current_room,
+                                event="gunshot",
+                                full_message=full_msg,
+                                shooter=user_display,
+                                target=target_display,
+                                radius=2,
+                                exclude_ids=[],
+                            )
+                        else:
+                            await notify_sound(
+                                interaction.guild,
+                                current_room,
+                                event="arrival",
+                                full_message=full_msg,
+                                radius=1,
+                                exclude_ids=[],
+                            )
+                    except Exception:
+                        pass
+
+                if target_id != user_id and target_role != "murderer" and item == "gun":
+                    players[user_id]["picked_up_gun"] = True
+                    save_players()
+                    
+                    # Drop the gun to the floor
+                    if item in players[user_id]["inventory"]:
+                        players[user_id]["inventory"].remove(item)
+                        save_players()
+                    
+                    room_items[current_room].append({"id": item})
+                    save_room_items()
+                    
+                    await asyncio.sleep(5)
+                    if allowed_channel:
+                        await allowed_channel.send(f"But {target_display} didn't look like a murderer...\nMaking {user_display} drop their gun, for whatever reason.")
+                        try:
+                            await notify_sound(
+                                interaction.guild,
+                                current_room,
+                                event="clatter",
+                                full_message=None,
+                                radius=2,
+                                exclude_ids=[],
+                            )
+                        except Exception:
+                            pass
 
                 death_message = random.choice(item_data["death_messages"])
                 
@@ -650,7 +927,7 @@ def setup_commands(bot):
                 target_member = interaction.guild.get_member(int(target_id))
                 if target_member:
                     await target_member.send(
-                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_nickname} the {user_role}, whom killed you with the {item_data["name"]}.\n## You become forgotten from the history books."
+                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_display} the {user_role}, whom killed you with the {item_data["name"]}.\n## You become forgotten from the history books."
                     )
         
         if target_type == "none":
@@ -735,7 +1012,16 @@ def setup_commands(bot):
             )
             return
 
+        if item == "gun" and players[user_id]["picked_up_gun"]:
+            await interaction.response.send_message(
+                "You can't pick up Revolvers.",
+                ephemeral=True
+            )
+            return
+
         user_nickname = players[user_id]["nickname"]
+        user_emoji = players[user_id].get("emoji", "")
+        user_display = f"{user_nickname} ({user_emoji})" if user_emoji else user_nickname
 
         await interaction.response.send_message(
             f"You picked up **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})**.",
@@ -749,12 +1035,25 @@ def setup_commands(bot):
                     room_items[current_room].pop(i)
                     break
 
+            save_room_items()
+
             players[user_id]["inventory"].append(item)
 
             if allowed_channel:
                 await allowed_channel.send(
-                    f"{user_nickname} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
+                    f"{user_display} picked up a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the ground."
                 )
+                try:
+                    await notify_sound(
+                        interaction.guild,
+                        current_room,
+                        event="pickup",
+                        full_message=f"{user_display} picked up {ITEMS[item]['name']}.",
+                        radius=1,
+                        exclude_ids=[user_id],
+                    )
+                except Exception:
+                    pass
 
         else:
 
@@ -762,7 +1061,7 @@ def setup_commands(bot):
 
             if allowed_channel:
                 await allowed_channel.send(
-                    f"{user_nickname} grabbed a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the room."
+                    f"{user_display} grabbed a **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** from the room."
                 )
 
         save_players()
@@ -846,10 +1145,13 @@ def setup_commands(bot):
 
         user_nickname = players[user_id]["nickname"]
         target_nickname = players[target_id]["nickname"]
+        target_emoji = players[target_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
+        
         item_name = ITEMS[item]["name"]
         
         await interaction.response.send_message(
-            f"You gave **{item_name} ({ITEMS[item]['emoji']})** to {target_nickname}.",
+            f"You gave **{item_name} ({ITEMS[item]['emoji']})** to {target_display}.",
             ephemeral=True
         )
 
@@ -936,21 +1238,60 @@ def setup_commands(bot):
         }
 
         coin_text = (
-            f"Since you are the murderer, you have {player['coins']} coins in your stash."
+            f"Since you are the murderer, you have <:Coin:1512937188751446269> {player['coins']} in your stash."
             if role == "murderer"
             else ""
         )
+        
+        player_emoji = player.get("emoji", "")
+        nickname_display = f"{player['nickname']} ({player_emoji})" if player_emoji else player["nickname"]
 
         await interaction.response.send_message(
             f"""# Information
 
-        You are {player["nickname"]}, the {role}.
+        You are {nickname_display}, the {role}.
         You are also currently staying in the {player["room"]}.
         {coin_text}
 
         Your objective is to {role_hint.get(role, "wait for the game to assign your role.")}
 
         Good luck aboard the Harpy Express.""",
+            ephemeral=True
+        )
+
+    @bot.tree.command(
+        name="timer",
+        description="(MURDERER) See the time remaining."
+    )
+    async def timer(interaction: discord.Interaction):
+        user_id = str(interaction.user.id)
+        error = check_player_status(user_id)
+
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        if not GAME["running"]:
+            await interaction.response.send_message(
+                "There isn't a game running right now.",
+                ephemeral=True
+            )
+            return
+
+        if players[user_id]["role"] != "murderer":
+            await interaction.response.send_message(
+                "Only the murderers know how long the train has left.",
+                ephemeral=True
+            )
+            return
+
+        remaining = time_remaining()
+        days, remaining = divmod(remaining, 86400)
+        hours, minutes = divmod(remaining, 3600)
+        minutes //= 60
+
+        await interaction.response.send_message(
+            f"## {days} day(s), {hours} hour(s), and {minutes} minute(s) remain.",
             ephemeral=True
         )
 

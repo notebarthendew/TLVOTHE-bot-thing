@@ -1,10 +1,10 @@
-# code for each player contesting in thvothe
+# code for each player contesting in tlvothe
 
 import json
 from pathlib import Path
 import discord
 from utils.constants import GAME_ROLE_ID, DEAD_ROLE_ID
-from game.map import ROOMS
+from game.room_visibility import hide_all_game_rooms
 
 players = {}
 
@@ -36,7 +36,7 @@ def load_players():
         players.clear()
         save_players()
 
-def create_player(user_id, nickname, role, spawn_room):
+def create_player(user_id, nickname, role, spawn_room, emoji):
 
     players[user_id] = {
         "room": spawn_room,
@@ -47,7 +47,9 @@ def create_player(user_id, nickname, role, spawn_room):
         "cooldowns": {},
         "edge_warnings": 0,
         "coins": 0,
-        "nickname": nickname
+        "picked_up_gun": False,
+        "nickname": nickname,
+        "emoji": emoji
     }
     print(f"Created player: {user_id}")
     print(players)
@@ -78,15 +80,4 @@ async def kill_player(
     if dead_role is not None:
         await member.add_roles(dead_role)
 
-    for room_data in ROOMS.values():
-
-        channel = guild.get_channel(room_data["channel_id"])
-
-        if channel is None:
-            channel = guild.get_thread(room_data["channel_id"])
-
-        if channel is not None:
-            await channel.set_permissions(
-                member,
-                overwrite=None
-            )
+    await hide_all_game_rooms(guild, member)

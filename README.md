@@ -6,7 +6,7 @@ The project is currently experimental and in active development. Its primary pur
 ---
 
 ## What the hell is this?
-This is a discord bot/game for the TLVOTHE server. It serves many porpuses but it doesn't have a use other than inside the TLVOTHE server.
+This is a discord bot/game for the TLVOTHE server. It serves many porpuses, but it doesn't have a use other than inside the TLVOTHE server.
 
 ## What is it specifically made for?
 Its made to run a murder mystery game on discord channels, with all types of mechanics.

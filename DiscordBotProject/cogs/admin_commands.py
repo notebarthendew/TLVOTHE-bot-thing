@@ -12,7 +12,9 @@ from utils.constants import GAME_ROLE_ID
 from utils.constants import DEAD_ROLE_ID
 from utils.helpers import check_player_status
 from game.map import ROOMS
-from game.room_items import room_items
+from game.room_items import room_items, save_room_items
+from game.game_state import GAME, end_game, register_kill, start_game
+from game.room_visibility import set_player_room, clear_player_room_visibility
 
 
 def setup_commands(bot):
@@ -90,6 +92,28 @@ def setup_commands(bot):
             if current.lower() in pdata["nickname"].lower()
         ][:25]
 
+    async def remove_autocomplete(interaction, current: str):
+        choices = []
+
+        if "everyone".startswith(current.lower()) or "all".startswith(current.lower()):
+            choices.append(
+                app_commands.Choice(
+                    name="Everyone in the game",
+                    value="__all__"
+                )
+            )
+
+        choices.extend(
+            app_commands.Choice(
+                name=pdata["nickname"],
+                value=pid
+            )
+            for pid, pdata in players.items()
+            if current.lower() in pdata["nickname"].lower()
+        )
+
+        return choices[:25]
+
     async def room_player_autocomplete(interaction, current: str):
         user_id = str(interaction.user.id)
         
@@ -126,6 +150,13 @@ def setup_commands(bot):
                 ephemeral=True
             )
 
+            return
+
+        if GAME["running"]:
+            await interaction.response.send_message(
+                "A game is already running.",
+                ephemeral=True
+            )
             return
 
         await interaction.response.defer(ephemeral=True)
@@ -202,36 +233,7 @@ def setup_commands(bot):
             if member is None:
                 continue
 
-            lobby_channel = interaction.guild.get_channel(
-                ROOMS["train_dock"]["channel_id"]
-            )
-
-            if lobby_channel is None:
-                lobby_channel = interaction.guild.get_thread(
-                    ROOMS["train_dock"]["channel_id"]
-                )
-
-            spawn_channel = interaction.guild.get_channel(
-                ROOMS[spawn_room]["channel_id"]
-            )
-
-            if spawn_channel is None:
-                spawn_channel = interaction.guild.get_thread(
-                    ROOMS[spawn_room]["channel_id"]
-                )
-
-            if lobby_channel is not None:
-                await lobby_channel.set_permissions(
-                    member,
-                    view_channel=False
-                )
-
-            # Show their spawn room
-            if spawn_channel is not None:
-                await spawn_channel.set_permissions(
-                    member,
-                    view_channel=True
-                )
+            await set_player_room(interaction.guild, member, spawn_room)
 
             save_players()
 
@@ -254,6 +256,19 @@ def setup_commands(bot):
 
             }
 
+            if role == "murderer":
+                cohort_id = next(mid for mid in murderers if mid != pid)
+                cohort_nickname = players[cohort_id]["nickname"]
+                cohort_emoji = players[cohort_id].get("emoji", "")
+                cohort_display = f"{cohort_nickname} ({cohort_emoji})" if cohort_emoji else cohort_nickname
+
+                murderer_text = (
+                    f"Your murderer co-hort is **{cohort_display}**. "
+                    f"Work together to be undetected."
+                )
+            else:
+                murderer_text = ""
+
             print(f"Sending DM to {member} ({pid})")
             print(member)
             print(member.guild.name)
@@ -268,6 +283,7 @@ def setup_commands(bot):
             There are 2 killers aboard the train.
 
             {ROLE_OBJECTIVES[role]}
+            {murderer_text}
             """
                 )
                 print(f"DM sent to {member}")
@@ -275,9 +291,45 @@ def setup_commands(bot):
             except Exception as e:
                 print(f"Couldn't DM {member}: {e}")
 
+        start_game(interaction.guild)
         await interaction.edit_original_response(
             content="Game started!"
         )
+
+    @bot.tree.command(
+        name="endgame",
+        description="(ADMIN) End the current game."
+    )
+    @app_commands.choices(winner=[
+        app_commands.Choice(name="Good guys", value="good"),
+        app_commands.Choice(name="Murderers", value="murderers"),
+    ])
+    async def endgame(
+        interaction: discord.Interaction,
+        winner: app_commands.Choice[str],
+    ):
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        if not GAME["running"]:
+            await interaction.response.send_message(
+                "There isn't a game running right now.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        await end_game(interaction.guild, winner.value)
+        await interaction.edit_original_response(content="Game ended.")
 
     @bot.tree.command(
         name="info",
@@ -305,9 +357,12 @@ def setup_commands(bot):
             member = interaction.guild.get_member(int(pid))
 
             username = member.name if member else "Unknown"
+            
+            emoji = pdata.get("emoji", "")
+            nickname_display = f"{pdata['nickname']} ({emoji})" if emoji else pdata['nickname']
 
             line = (
-                f"**{pdata['nickname']}** "
+                f"**{nickname_display}** "
                 f"({username})\n"
                 f"ID: `{pid}` | "
                 f"{'🟢' if pdata['alive'] else '🔴'} | "
@@ -397,7 +452,8 @@ def setup_commands(bot):
         member: discord.Member,
         nickname: str,
         role: str,
-        spawn_room: str
+        spawn_room: str,
+        emoji: str | None = None
     ):
 
         # Check admin role
@@ -438,7 +494,7 @@ def setup_commands(bot):
         
         # Create player
         print("ADD COMMAND REACHED")
-        create_player(user_id, nickname, role, spawn_room)
+        create_player(user_id, nickname, role, spawn_room, emoji)
 
         # Give game role
         game_role = interaction.guild.get_role(
@@ -447,18 +503,77 @@ def setup_commands(bot):
 
         await member.add_roles(game_role)
 
-        spawn_channel = interaction.guild.get_channel(
-            ROOMS[spawn_room]["channel_id"]
-        )
-
-        await spawn_channel.set_permissions(
-            member,
-            view_channel=True
-        )
+        await set_player_room(interaction.guild, member, spawn_room)
 
         await interaction.response.send_message(
             f"{member.mention} joined the game in room {spawn_room}.",
             ephemeral=True
+        )
+
+    @bot.tree.command(
+        name="addall",
+        description="(ADMIN) Add EVERYONE in the server to the game (chaos mode 😈)"
+    )
+
+    @app_commands.autocomplete(
+        role=role_autocomplete,
+        spawn_room=room_autocomplete
+    )
+
+    async def addall(
+        interaction: discord.Interaction,
+        role: str,
+        spawn_room: str,
+        emoji: str | None = None
+    ):
+        # Check admin role
+        has_admin_role = any(
+            r.id == ADMIN_ROLE_ID
+            for r in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        if spawn_room not in ROOMS:
+            await interaction.response.send_message(
+                "That room does not exist.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        added_count = 0
+        skipped_count = 0
+
+        for member in interaction.guild.members:
+            if member.bot:
+                skipped_count += 1
+                continue
+
+            user_id = str(member.id)
+
+            if user_id in players:
+                skipped_count += 1
+                continue
+
+            nickname = member.display_name
+            create_player(user_id, nickname, role, spawn_room, emoji)
+
+            game_role = interaction.guild.get_role(GAME_ROLE_ID)
+            if game_role is not None:
+                await member.add_roles(game_role)
+
+            await set_player_room(interaction.guild, member, spawn_room)
+            added_count += 1
+
+        await interaction.edit_original_response(
+            content=f"🎉 **CHAOS MODE ACTIVATED** 🎉\n\nAdded **{added_count}** player(s) to the game!\n(Skipped {skipped_count} bot(s) and already-added player(s))"
         )
 
     @bot.tree.command(
@@ -467,12 +582,16 @@ def setup_commands(bot):
     )
 
     @app_commands.describe(
-        member="The player to remove"
+        target="The player to remove, or everyone in the game"
+    )
+
+    @app_commands.autocomplete(
+        target=remove_autocomplete
     )
 
     async def remove(
         interaction: discord.Interaction,
-        member: discord.Member,
+        target: str,
     ):
 
         await interaction.response.defer(ephemeral=True)
@@ -489,40 +608,45 @@ def setup_commands(bot):
 
             return
             
-        user_id = str(member.id)
-
-        if user_id not in players:
+        if target == "__all__":
+            player_ids = list(players)
+        elif target in players:
+            player_ids = [target]
+        else:
             await interaction.edit_original_response(
                 content="That player isn't in the game."
             )
-
             return
-
-        for room_data in ROOMS.values():
-
-            channel = interaction.guild.get_channel(
-                room_data["channel_id"]
-            )
-
-            if channel is not None:
-
-                await channel.set_permissions(
-                    member,
-                    overwrite=None
-                )
 
         game_role = interaction.guild.get_role(
             GAME_ROLE_ID
         )
-
-        if game_role is not None:
-            await member.remove_roles(game_role)
-
-        remove_player(user_id)
-
-        await interaction.edit_original_response(
-            content=f"{member.mention} was removed from the game."
+        dead_role = interaction.guild.get_role(
+            DEAD_ROLE_ID
         )
+
+        for user_id in player_ids:
+            member = interaction.guild.get_member(int(user_id))
+
+            if member is not None:
+                await clear_player_room_visibility(interaction.guild, member)
+
+                if game_role is not None:
+                    await member.remove_roles(game_role)
+
+                if dead_role is not None:
+                    await member.remove_roles(dead_role)
+
+            remove_player(user_id)
+
+        if target == "__all__":
+            await interaction.edit_original_response(
+                content=f"Removed {len(player_ids)} player(s) from the game."
+            )
+        else:
+            await interaction.edit_original_response(
+                content="The player was removed from the game."
+            )
     
     @bot.tree.command(name="checkplayers")
     async def checkplayers(interaction: discord.Interaction):
@@ -605,8 +729,10 @@ def setup_commands(bot):
         save_players()
 
         target_nickname = players[user_id]["nickname"]
+        target_emoji = players[user_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
         await interaction.response.send_message(
-            f"Gave **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** to {target_nickname}.",
+            f"Gave **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** to {target_display}.",
             ephemeral=True
         )
 
@@ -661,17 +787,20 @@ def setup_commands(bot):
             await target_member.add_roles(dead_role)
 
         target_nickname = players[target_id]["nickname"]
+        target_emoji = players[target_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
 
         current_room = players[target_id]["room"]
         room_channel = interaction.guild.get_channel(ROOMS[current_room]["channel_id"])
 
         await interaction.response.send_message(
-            f"*{target_nickname} has been killed.*",
+            f"*{target_display} has been killed.*",
             ephemeral=True
         )
         await room_channel.send(
-            f"*{target_nickname} has died.*"
+            f"*{target_display} has died.*"
         )
+        await register_kill(interaction.guild)
 
     @bot.tree.command(name="itemspawn")
 
@@ -725,6 +854,7 @@ def setup_commands(bot):
         room_items[room].append({
             "id": item
         })
+        save_room_items()
 
         await interaction.response.send_message(
             f"Spawned **{ITEMS[item]['name']} ({ITEMS[item]['emoji']})** in room {room}.",
@@ -733,3 +863,152 @@ def setup_commands(bot):
 
         return
 
+    @bot.tree.command(
+        name="revive",
+        description="(ADMIN) Revive a dead player"
+    )
+    @app_commands.describe(target="The player to revive")
+    @app_commands.autocomplete(target=player_nickname_autocomplete)
+    async def revive(
+        interaction: discord.Interaction,
+        target: str
+    ):
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        target_id = target
+
+        if target_id not in players:
+            await interaction.response.send_message(
+                "That player is not in the game.",
+                ephemeral=True
+            )
+            return
+
+        players[target_id]["alive"] = True
+        save_players()
+
+        dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
+        game_role = interaction.guild.get_role(GAME_ROLE_ID)
+
+        target_member = interaction.guild.get_member(int(target_id))
+        if target_member:
+            await target_member.remove_roles(dead_role)
+            await target_member.add_roles(game_role)
+            
+            # Restore room visibility
+            player_room = players[target_id]["room"]
+            await set_player_room(interaction.guild, target_member, player_room)
+
+        target_nickname = players[target_id]["nickname"]
+        target_emoji = players[target_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
+
+        await interaction.response.send_message(
+            f"Revived {target_display}.",
+            ephemeral=True
+        )
+
+    @bot.tree.command(
+        name="tp",
+        description="(ADMIN) Teleport a player to a room"
+    )
+    @app_commands.describe(target="The player to teleport", room="The room to teleport them to")
+    @app_commands.autocomplete(target=player_nickname_autocomplete, room=room_autocomplete)
+    async def tp(
+        interaction: discord.Interaction,
+        target: str,
+        room: str
+    ):
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        target_id = target
+
+        if target_id not in players:
+            await interaction.response.send_message(
+                "That player is not in the game.",
+                ephemeral=True
+            )
+            return
+
+        if room not in ROOMS:
+            await interaction.response.send_message(
+                "That room does not exist.",
+                ephemeral=True
+            )
+            return
+
+        players[target_id]["room"] = room
+        save_players()
+
+        target_nickname = players[target_id]["nickname"]
+        target_emoji = players[target_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
+
+        await interaction.response.send_message(
+            f"Teleported {target_display} to {room}.",
+            ephemeral=True
+        )
+
+    @bot.tree.command(
+        name="givecoins",
+        description="(ADMIN) Give coins to a player"
+    )
+    @app_commands.describe(target="The player to give coins to", amount="Number of coins")
+    @app_commands.autocomplete(target=player_nickname_autocomplete)
+    async def givecoins(
+        interaction: discord.Interaction,
+        target: str,
+        amount: int
+    ):
+        has_admin_role = any(
+            role.id == ADMIN_ROLE_ID
+            for role in interaction.user.roles
+        )
+
+        if not has_admin_role:
+            await interaction.response.send_message(
+                "You can't do that, silly.",
+                ephemeral=True
+            )
+            return
+
+        target_id = target
+
+        if target_id not in players:
+            await interaction.response.send_message(
+                "That player is not in the game.",
+                ephemeral=True
+            )
+            return
+
+        players[target_id]["coins"] = players[target_id].get("coins", 0) + amount
+        save_players()
+
+        target_nickname = players[target_id]["nickname"]
+        target_emoji = players[target_id].get("emoji", "")
+        target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
+
+        await interaction.response.send_message(
+            f"Gave <:Coin:1512937188751446269> {amount} to {target_display}.",
+            ephemeral=True
+        )

@@ -1,6 +1,7 @@
 # yall, i know this may look like crap, but this is my first bot so please
 
 import random
+import time
 
 import discord
 from discord.ext import commands
@@ -22,16 +23,18 @@ intents.members = True
 bot = commands.Bot(command_prefix='?', intents=intents)
 
 from game.player import load_players
+from game.room_items import load_room_items
+from game.game_state import GAME, end_game, load_game_state
 from cogs.commands import setup_commands as setup_slash_commands
 from cogs.prefix_commands import setup_commands as setup_prefix_commands
 from cogs.game_commands import setup_commands as setup_game_commands
-from cogs.message_commands import setup_commands as setup_message_events
+from cogs.message_commands import setup_commands as setup_message_commands
 from cogs.admin_commands import setup_commands as setup_admin_commands
 
 setup_slash_commands(bot)
 setup_prefix_commands(bot)
 setup_game_commands(bot)
-setup_message_events(bot)
+setup_message_commands(bot)
 setup_admin_commands(bot)
 
 STATUSES = [
@@ -99,6 +102,30 @@ async def rotate_status():
         activity=discord.Game(random.choice(STATUSES))
     )
 
+
+@tasks.loop(minutes=1)
+async def game_loop():
+    if not GAME["running"] or time.time() < GAME["end_time"]:
+        return
+
+    guild = bot.get_guild(GAME["guild_id"])
+    if guild is not None:
+        await end_game(guild, "good")
+
+@tasks.loop(minutes=5)
+async def murderer_passive_income():
+    """Give the murderer 10 coins every 5 minutes passively."""
+    if not GAME["running"]:
+        return
+    
+    from game.player import players, save_players
+    
+    for user_id, player in players.items():
+        if player.get("role") == "murderer" and not player.get("dead", False):
+            player["coins"] = player.get("coins", 0) + 10
+    
+    save_players()
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}, {bot.user.id}')
@@ -123,6 +150,12 @@ async def on_ready():
     if not rotate_status.is_running():
         rotate_status.start()
 
+    if not game_loop.is_running():
+        game_loop.start()
+    
+    if not murderer_passive_income.is_running():
+        murderer_passive_income.start()
+
 @bot.event
 async def on_guild_join(guild):
     for channel in guild.text_channels:
@@ -141,6 +174,8 @@ async def on_guild_join(guild):
             print(f"Failed to send join message: {e}")
 
 load_players()
+load_room_items()
+load_game_state()
 
 @bot.tree.error
 async def on_app_command_error(

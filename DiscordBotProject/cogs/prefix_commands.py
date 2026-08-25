@@ -21,6 +21,6 @@ def setup_commands(bot):
 
     @bot.command()
     async def revolver(ctx):
-        await ctx.reply(f"Heres a gun\n"
+        await ctx.reply(f"Here's a gun\n"
                        "# <:Revolver:1505709394057494659>")
         print("Sent revolver prefix command")
