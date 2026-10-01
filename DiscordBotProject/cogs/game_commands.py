@@ -18,6 +18,12 @@ from utils.helpers import format_time
 from game.map import ROOMS
 from game.room_items import room_items, save_room_items
 from game.game_state import GAME, register_kill, time_remaining
+from game.status_effects import (
+    POISON_DURATION_SECONDS,
+    POISON_STATUS,
+    add_status_effect,
+    get_status_text,
+)
 from game.room_visibility import set_player_room
 from game.sound import notify_sound, notify_global
 
@@ -189,6 +195,47 @@ def setup_commands(bot):
         )
 
         return choices[:25]
+
+    async def room_target_autocomplete(interaction, current: str):
+        choices = await room_player_autocomplete(interaction, current)
+        user_id = str(interaction.user.id)
+        if user_id not in players:
+            return choices
+
+        current_room = players[user_id]["room"]
+        food_ids = set(ROOMS[current_room]["take_items"])
+        food_ids.update(
+            item_data["id"]
+            for item_data in room_items[current_room]
+            if isinstance(item_data, dict) and "id" in item_data
+        )
+        choices.extend(
+            app_commands.Choice(
+                name=f"{ITEMS[item_id]['name']} (food/drink)",
+                value=item_id,
+            )
+            for item_id in food_ids
+            if item_id in ITEMS
+            and ITEMS[item_id].get("edible")
+            and current.lower() in ITEMS[item_id]["name"].lower()
+        )
+        return choices[:25]
+
+    async def edible_inventory_autocomplete(interaction, current: str):
+        user_id = str(interaction.user.id)
+        if user_id not in players:
+            return []
+
+        return [
+            app_commands.Choice(
+                name=ITEMS[item]["name"],
+                value=item,
+            )
+            for item in players[user_id]["inventory"]
+            if item in ITEMS
+            and ITEMS[item].get("edible")
+            and current.lower() in ITEMS[item]["name"].lower()
+        ][:25]
         
     
     @bot.tree.command(
@@ -647,7 +694,7 @@ def setup_commands(bot):
 
     @app_commands.autocomplete(
         item=inventory_item_autocomplete,
-        target=room_player_autocomplete
+        target=room_target_autocomplete
     )
 
     async def use(
@@ -922,13 +969,83 @@ def setup_commands(bot):
                             pass
 
                 death_message = random.choice(item_data["death_messages"])
+                item_name = item_data["name"]
                 
                 # Get the Discord member and send them a DM if they exist
                 target_member = interaction.guild.get_member(int(target_id))
                 if target_member:
                     await target_member.send(
-                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_display} the {user_role}, whom killed you with the {item_data["name"]}.\n## You become forgotten from the history books."
+                        f"## {death_message}\n\n*You are dead. You may act out your final moments, or roleplay as a corpse, but you can no longer use game commands.*\nThe one that brought your demise was {user_display} the {user_role}, who killed you with the {item_name}.\n## You become forgotten from the history books."
                     )
+
+        if target_type == "room":
+            if target is None:
+                await interaction.response.send_message(
+                    "Choose a food or drink in this room to poison.",
+                    ephemeral=True,
+                )
+                return
+
+            if item_data.get("action") != "poison" or target not in ITEMS:
+                await interaction.response.send_message(
+                    "That item cannot be poisoned.",
+                    ephemeral=True,
+                )
+                return
+
+            target_data = ITEMS[target]
+            if not target_data.get("edible"):
+                await interaction.response.send_message(
+                    "Poison can only be applied to food or drinks.",
+                    ephemeral=True,
+                )
+                return
+
+            existing_poisoned_item = next(
+                (
+                    room_item
+                    for room_item in room_items[current_room]
+                    if room_item.get("id") == target
+                    and room_item.get("poisoned", False)
+                ),
+                None,
+            )
+            if existing_poisoned_item is not None:
+                await interaction.response.send_message(
+                    f"The **{target_data['name']}** is already poisoned.",
+                    ephemeral=True,
+                )
+                return
+
+            floor_item = next(
+                (
+                    room_item
+                    for room_item in room_items[current_room]
+                    if room_item.get("id") == target
+                ),
+                None,
+            )
+            if floor_item is not None:
+                floor_item["poisoned"] = True
+                floor_item["poisoned_next_pickup"] = True
+            elif target in ROOMS[current_room]["take_items"]:
+                room_items[current_room].append({
+                    "id": target,
+                    "poisoned": True,
+                    "poisoned_next_pickup": True,
+                })
+            else:
+                await interaction.response.send_message(
+                    "That food or drink is not in this room.",
+                    ephemeral=True,
+                )
+                return
+
+            save_room_items()
+            await interaction.response.send_message(
+                f"You quietly apply the poison to **{target_data['name']}**.",
+                ephemeral=True,
+            )
         
         if target_type == "none":
         
@@ -940,13 +1057,39 @@ def setup_commands(bot):
         if item_data["consumable"]:
 
             players[user_id]["inventory"].remove(item)
+            poisoned = item in players[user_id].setdefault("poisoned_items", [])
+            if poisoned:
+                players[user_id]["poisoned_items"].remove(item)
+                add_status_effect(
+                    players[user_id],
+                    POISON_STATUS,
+                    duration=POISON_DURATION_SECONDS,
+                    source=item,
+                )
+
+            item_emoji = item_data.get("emoji", "")
+            consumed_item = (
+                f"{item_emoji} **{item_data['name']}**"
+                if item_emoji
+                else f"**{item_data['name']}**"
+            )
+            save_players()
 
             await interaction.followup.send(
-                "The item withers away from your very own eyes.",
+                f"You consumed {consumed_item}.",
                 ephemeral=True
             )
-            
-            save_players()
+
+            user_display = players[user_id]["nickname"]
+            room_channel = interaction.guild.get_channel(
+                ROOMS[current_room]["channel_id"]
+            ) or interaction.guild.get_thread(
+                ROOMS[current_room]["channel_id"]
+            )
+            if item_data.get("edible") and room_channel is not None:
+                await room_channel.send(
+                    f"**{user_display}** consumed {consumed_item}."
+                )
 
         if "cooldown" in item_data:
 
@@ -955,6 +1098,73 @@ def setup_commands(bot):
             )
 
             save_players()
+
+    @bot.tree.command(
+        name="eat",
+        description="(PLAYER) Eat or drink an item from your inventory.",
+    )
+    @app_commands.autocomplete(item=edible_inventory_autocomplete)
+    async def eat(interaction: discord.Interaction, item: str):
+        user_id = str(interaction.user.id)
+        error = check_player_status(user_id)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+
+        player = players[user_id]
+        if item not in player["inventory"] or item not in ITEMS:
+            await interaction.response.send_message(
+                "You don't have that food or drink.",
+                ephemeral=True,
+            )
+            return
+
+        item_data = ITEMS[item]
+        if not item_data.get("edible"):
+            await interaction.response.send_message(
+                "That item is not something you can eat or drink.",
+                ephemeral=True,
+            )
+            return
+
+        poisoned_items = player.setdefault("poisoned_items", [])
+        poisoned = item in poisoned_items
+        player["inventory"].remove(item)
+        if poisoned:
+            poisoned_items.remove(item)
+            add_status_effect(
+                player,
+                POISON_STATUS,
+                duration=POISON_DURATION_SECONDS,
+                source=item,
+            )
+
+        save_players()
+        item_emoji = item_data.get("emoji", "")
+        consumed_item = (
+            f"{item_emoji} **{item_data['name']}**"
+            if item_emoji
+            else f"**{item_data['name']}**"
+        )
+        if poisoned:
+            message = (
+                f"You consume {consumed_item}. It tastes fine... "
+                "but something is very wrong."
+            )
+        else:
+            message = f"You consume {consumed_item}. Delicious."
+
+        await interaction.response.send_message(message, ephemeral=True)
+
+        room_channel = interaction.guild.get_channel(
+            ROOMS[player["room"]]["channel_id"]
+        ) or interaction.guild.get_thread(
+            ROOMS[player["room"]]["channel_id"]
+        )
+        if item_data.get("edible") and room_channel is not None:
+            await room_channel.send(
+                f"**{player['nickname']}** consumed {consumed_item}."
+            )
        
     @bot.tree.command(
     name="take", 
@@ -1030,14 +1240,22 @@ def setup_commands(bot):
 
         if item_on_floor:
 
+            floor_item_data = None
             for i, room_item in enumerate(room_items[current_room]):
                 if room_item["id"] == item:
+                    floor_item_data = room_item
                     room_items[current_room].pop(i)
                     break
 
             save_room_items()
 
             players[user_id]["inventory"].append(item)
+            if floor_item_data and (
+                floor_item_data.get("poisoned_next_pickup")
+                or floor_item_data.get("poisoned")
+            ):
+                floor_item_data["poisoned_next_pickup"] = False
+                players[user_id].setdefault("poisoned_items", []).append(item)
 
             if allowed_channel:
                 await allowed_channel.send(
@@ -1141,6 +1359,10 @@ def setup_commands(bot):
 
         players[user_id]["inventory"].remove(item)
         players[target_id]["inventory"].append(item)
+        poisoned_items = players[user_id].setdefault("poisoned_items", [])
+        if item in poisoned_items:
+            poisoned_items.remove(item)
+            players[target_id].setdefault("poisoned_items", []).append(item)
         save_players()
 
         user_nickname = players[user_id]["nickname"]
@@ -1218,14 +1440,6 @@ def setup_commands(bot):
 
         player = players[user_id]
 
-        #statuses = (
-        #    ", ".join(player["status"])
-        #    if player["status"]
-        #    else "None"
-        #)
-
-        # keeping this in the code till i have status effects
-
         role = (player["role"] or "none").lower()
 
         role_hint = {
@@ -1251,6 +1465,7 @@ def setup_commands(bot):
 
         You are {nickname_display}, the {role}.
         You are also currently staying in the {player["room"]}.
+        Your status: {get_status_text(player)}.
         {coin_text}
 
         Your objective is to {role_hint.get(role, "wait for the game to assign your role.")}
@@ -1312,6 +1527,3 @@ def setup_commands(bot):
         )
 
 # h
-
-
-

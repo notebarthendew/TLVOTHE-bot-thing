@@ -4,6 +4,8 @@ import discord
 import time
 import random
 import asyncio
+from cogs.ui import GuideView
+from cogs.ui import DiceDuelChallengeView, DiceDuelRoundAnnounceView, build_round_embed
 
 def setup_commands(bot):
 
@@ -376,6 +378,124 @@ def setup_commands(bot):
           )
           print(f"{interaction.user} lost {money}")
 
+  @bot.tree.command(name="interrogate", description="Extract a confession (Results not admissible in court)")
+  async def interrogate(interaction: discord.Interaction, suspect: discord.Member):
+
+      CONFESSIONS = [
+          "I was in the dining car the whole time, ask the soup, it saw everything.",
+          "Okay, fine, I stole a fork. That's it. That's the crime.",
+          "I have never once been in the engine room. That is not my engine grease on my hands.",
+          "My alibi is that I was asleep. My other alibi is that I was somewhere else asleep.",
+          "I plead the fifth carriage.",
+          "You can't prove anything, and even if you could, the lighting was bad.",
+          "I panicked and hid a spoon. I don't know why.",
+          "Whatever happened, it was probably the conductor.",
+          "I was definitely not counting someone else's coins.",
+          "I have an airtight alibi and I will not be elaborating further.",
+          "Look, all I did was borrow a lantern. Forever.",
+          "I've never even heard of a knife. What's a knife.",
+          "I was in the library reading about how to not get caught. For research.",
+          "Someone else was wearing my coat. I don't know who. I also don't own a coat.",
+          "I refuse to answer on the grounds that the answer is bad for me.",
+      ]
+
+      await interaction.response.send_message(
+          f"*{interaction.user.mention} corners {suspect.mention} and demands answers.*"
+      )
+      await asyncio.sleep(2)
+      await interaction.followup.send(f"**{suspect.display_name}:** \"{random.choice(CONFESSIONS)}\"")
+
+  @bot.tree.command(name="omen", description="Consult the cards...")
+  async def omen(interaction: discord.Interaction):
+
+      OMENS = [
+          "The cards show a stranger, a shadow, and a suspiciously specific amount of soup.",
+          "Tonight, trust no one who offers you tea. Or coffee. Honestly just be careful with beverages.",
+          "The tea leaves spell out a warning. Unfortunately, nobody can read tea leaves. Good luck.",
+          "A door will open that should have stayed closed. Please close it again.",
+          "Someone near you is not who they say they are. Statistically, that's true for everyone.",
+          "The train whistle will sound at an inconvenient moment. It always does.",
+          "You will hear something you shouldn't. Act like you didn't.",
+          "The cards are unclear, mostly because you shuffled them wrong.",
+          "Beware of quiet passengers. Also loud ones. Honestly just beware.",
+          "A friendship will be tested. Possibly over a sandwich.",
+          "The spirits say 'maybe.' The spirits are not helpful today.",
+          "Something you own will go missing. It was probably you who moved it.",
+          "The engine room holds a secret. It's mostly just grease.",
+          "Your fortune is obscured by suspicious circumstances.",
+          "The cards predict an excellent day for minding your own business.",
+      ]
+
+      await interaction.response.send_message(
+          f"*{interaction.user.mention} draws a card from the deck.*"
+      )
+      await asyncio.sleep(2)
+      await interaction.followup.send(f'*"{random.choice(OMENS)}"*')
+
+  @bot.tree.command(name="kill_rp", description="Kill someone in cold blood (fake blood)")
+  async def kill_rp(interaction: discord.Interaction, target: discord.Member):
+
+      KILLS = [
+          "<:RevolverAction:1505709405608607785> {user} fired a shot straight into {target}.",
+          "<:RevolverAction:1505709405608607785> A gunshot echoed through the train as {user} shot {target}.",
+          "<:RevolverAction:1505709405608607785> {target} collapsed after being shot by {user}.",
+          "<:RevolverAction:1505709405608607785> {user} pulled the trigger. {target} never got back up.",
+          "<:RevolverAction:1505709405608607785> One deafening shot later, caused by {user}, {target} laid dead.",
+          "<:RevolverAction:1505709405608607785> {user} fired without hesitation, killing {target}.",
+          "<:RevolverAction:1505709405608607785> The revolver barked, and {target} hit the floor.",
+          "<:RevolverAction:1505709405608607785> Smoke drifted from the revolver {user} fired as {target} fell.",
+          "<:RevolverAction:1505709405608607785> {user} introduced {target} to the second amendment.",
+          "<:KnifeAction:1505709406698995863> {user} plunged the knife into {target}.",
+          "<:KnifeAction:1505709406698995863> {target} was stabbed to death by {user}.",
+          "<:KnifeAction:1505709406698995863> {user} buried the knife into {target}'s chest.",
+      ]
+
+      line = random.choice(KILLS).format(
+          user=interaction.user.mention,
+          target=target.mention,
+      )
+
+      await interaction.response.send_message(line)
+
+  @bot.tree.command(name="diceduel",
+                    description="Challenge someone to a guessing game.")
+  async def diceduel(interaction: discord.Interaction, opponent: discord.Member):
+      if opponent.id == interaction.user.id:
+          await interaction.response.send_message("You can't duel yourself.", ephemeral=True)
+          return
+
+      if opponent.bot:
+          game = {
+              "p1": interaction.user,
+              "p2": opponent,
+              "scores": {interaction.user.id: 0, opponent.id: 0},
+              "guesses": {},
+              "round": 1,
+          }
+          announce_view = DiceDuelRoundAnnounceView(game)
+          game["announce_view"] = announce_view
+
+          embed = build_round_embed(
+              game,
+              "The bot is ready. Make your guess.",
+              "waiting",
+          )
+          await interaction.response.send_message(embed=embed, view=announce_view)
+          game["message"] = await interaction.original_response()
+          return
+
+      embed = discord.Embed(
+          title="Dice Duel Challenge",
+          description=f"{interaction.user.mention} is challenging {opponent.mention} to a dice duel.",
+          color=discord.Color.dark_gold(),
+      )
+
+      await interaction.response.send_message(
+          content=opponent.mention,
+          embed=embed,
+          view=DiceDuelChallengeView(interaction.user, opponent),
+      )
+
   @bot.tree.command(name="uptime")
   async def uptime(interaction: discord.Interaction):
 
@@ -386,7 +506,7 @@ def setup_commands(bot):
       minutes, seconds = divmod(seconds, 60)
 
       await interaction.response.send_message(
-          f"<:Keys:1453900262698651749> The Harpy Express has been running for:\n"
+          f"<:Keys:1505709397341376692> The Harpy Express has been running for:\n"
           f"**{days}d {hours}h {minutes}m {seconds}s**"
       )
 
@@ -399,6 +519,10 @@ def setup_commands(bot):
                                             "* '/trainfact' Sends a random fact about trains.\n"
                                             "* '/coinflip' Simple and useful coinflip.\n"
                                             "* '/uptime' Show for how long the bot has been running.\n"
+                                            "* '/guide' Show for how long the bot has been running.\n"
+                                            "* '/interrogate' Get answers from someone.\n"
+                                            "* '/omen' Get advice from a card deck.\n"
+                                            "* '/kill_rp' Kill someone in roleplay.\n"
                                             "## Prefix Commands\n"
                                             "* '?hello' Say hi and ping the caller\n"
                                             "* '?reply' Send a discord reply to the caller\n"
@@ -422,5 +546,16 @@ def setup_commands(bot):
                                             "*This will be regularly updated until all planned actions are implemented.*",
                                             ephemeral=True
                                             )
-    
 
+  @bot.tree.command(name="guide", description="Open the TLVOTHE game guide.")
+  async def guide(interaction: discord.Interaction):
+      embed = discord.Embed(
+          title="TLVOTHE Game Guide",
+          description="Choose a section from the dropdown below.",
+      )
+
+      await interaction.response.send_message(
+          embed=embed,
+          view=GuideView(interaction.user.id),
+          ephemeral=True
+      )

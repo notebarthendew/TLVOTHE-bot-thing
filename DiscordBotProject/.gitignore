@@ -1,1 +1,7 @@
 .env
+__pycache__/
+*.py[cod]
+*.log
+data/players.json
+data/game.json
+data/room_items.json

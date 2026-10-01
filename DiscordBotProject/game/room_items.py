@@ -25,9 +25,6 @@ def load_room_items():
     try:
         with ROOM_ITEMS_FILE.open("r", encoding="utf-8") as file:
             saved_room_items = json.load(file)
-            content = file.read()
-            print("FILE CONTENTS:")
-            print(repr(content))
     except (json.JSONDecodeError, OSError) as error:
         print(f"Couldn't load room items: {error}")
         return

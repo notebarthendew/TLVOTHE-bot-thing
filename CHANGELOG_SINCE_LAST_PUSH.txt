@@ -1,0 +1,25 @@
+Changes since the last push (origin/main at 1c279ab)
+====================================================
+
+Gameplay commands and items
+- Added edible food and drink handling, including /eat and public room notices.
+- Added poison application, transfer, warning, and timed-death handling.
+- Added poison-aware room item pickup and player item transfer.
+- Added room item autocomplete and visible player status text.
+- Updated item emoji and consumable definitions.
+
+Game and Discord behavior
+- Added persisted game state and a periodic game/status-effect loop.
+- Added room visibility helpers for room movement, death, revival, and leaving.
+- Added directional sound notifications and global announcements.
+- Improved admin player add, kill, revive, and teleport handling.
+- Added a game guide UI, dice duel, and roleplay commands.
+- Moved startup loading into main() and report a clear error when DISCORD_TOKEN is missing.
+
+Maintenance
+- Removed debug output that printed complete player save data and removed redundant room-save reads.
+- Fixed the generic sound notification fallback so it does not reference an undefined variable.
+- Added ignores for Python bytecode, logs, and runtime game saves; removed tracked bytecode from Git.
+- Parsed all 23 Python source files successfully with the project's virtual environment.
+
+Runtime player data, room saves, game saves, and log files were left out of this changeset.

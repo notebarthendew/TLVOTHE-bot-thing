@@ -4,7 +4,7 @@ ITEMS = {
 
         "name": "Knife",
 
-        "emoji": "<:Knife:1448502216796147842>",
+        "emoji": "<:Knife:1505709395294687292>",
         
         "description": (
             "A sharp kitchen knife."
@@ -22,23 +22,23 @@ ITEMS = {
 
         "kill_messages": [
 
-            "<:KnifeAction:1448502320261496852> {user} plunged the knife into {target}.",
+            "<:KnifeAction:1505709406698995863> {user} plunged the knife into {target}.",
 
-            "<:KnifeAction:1448502320261496852> {target} was stabbed to death by {user}.",
+            "<:KnifeAction:1505709406698995863> {target} was stabbed to death by {user}.",
 
-            "<:KnifeAction:1448502320261496852> {user} buried the knife into {target}'s chest.",
+            "<:KnifeAction:1505709406698995863> {user} buried the knife into {target}'s chest.",
 
-            "<:KnifeAction:1448502320261496852> {target} never saw the blade coming.",
+            "<:KnifeAction:1505709406698995863> {target} never saw the blade coming.",
 
         ],
 
         "self_kill_messages": [
 
-            "<:KnifeAction:1448502320261496852> {user} stabbed themselves. (what a way to go out vro)",
+            "<:KnifeAction:1505709406698995863> {user} stabbed themselves. (what a way to go out vro)",
 
-            "<:KnifeAction:1448502320261496852> {user} somehow managed to lose a fight against their own knife.",
+            "<:KnifeAction:1505709406698995863> {user} somehow managed to lose a fight against their own knife.",
 
-            "<:KnifeAction:1448502320261496852> {user} decided life wasn't worth it anymore."
+            "<:KnifeAction:1505709406698995863> {user} decided life wasn't worth it anymore."
 
         ],
 
@@ -197,14 +197,14 @@ ITEMS = {
 
         "name": "Poison Bottle",
 
-        "emoji": "<:Keys:1453900262698651749>",
+        "emoji": "<:PoisonBottle:1505709396267630692>",
         
         "description": (
             "Apply it to a food or drink tray and if someone eats it, it will guarantee their death... slowly but surely."
         ),
 
 
-        "usable": False,
+        "usable": True,
 
         "consumable": True,
 
@@ -225,11 +225,15 @@ ITEMS = {
         ),
 
 
-        "usable": False,
+        "usable": True,
 
         "consumable": True,
 
-        "target_type": "na"
+        "target_type": "none",
+
+        "text": "You take a careful sip of the martini. It is surprisingly good.",
+
+        "edible": True
 
     },
 
@@ -244,11 +248,15 @@ ITEMS = {
         ),
 
 
-        "usable": False,
+        "usable": True,
 
         "consumable": True,
 
-        "target_type": "na"
+        "target_type": "none",
+
+        "text": "You eat the fries. They are salty, greasy, and exactly what you needed.",
+
+        "edible": True
 
     },
 
@@ -268,7 +276,9 @@ ITEMS = {
 
         "consumable": True,
 
-        "target_type": "none"
+        "target_type": "none",
+
+        "edible": True
 
     },
 

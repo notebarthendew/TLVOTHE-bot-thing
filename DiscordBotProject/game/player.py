@@ -11,10 +11,6 @@ players = {}
 PLAYERS_FILE = Path(__file__).resolve().parent.parent / "data" / "players.json"
 
 def save_players():
-
-    print("SAVE PLAYERS CALLED")
-    print(players)
-    
     PLAYERS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with PLAYERS_FILE.open("w", encoding="utf-8") as file:
         json.dump(players, file, indent=4)
@@ -23,15 +19,11 @@ def load_players():
     if PLAYERS_FILE.exists():
         with PLAYERS_FILE.open("r", encoding="utf-8") as file:
 
-            content = file.read()
-            
-            print("FILE CONTENTS:")
-            print(repr(content))
-
-            file.seek(0)
-    
             players.clear()
             players.update(json.load(file))
+            for player in players.values():
+                player.setdefault("status", [])
+                player.setdefault("poisoned_items", [])
     else:
         players.clear()
         save_players()
@@ -44,6 +36,7 @@ def create_player(user_id, nickname, role, spawn_room, emoji):
         "role": role,
         "inventory": [],
         "status": [],
+        "poisoned_items": [],
         "cooldowns": {},
         "edge_warnings": 0,
         "coins": 0,
@@ -51,8 +44,6 @@ def create_player(user_id, nickname, role, spawn_room, emoji):
         "nickname": nickname,
         "emoji": emoji
     }
-    print(f"Created player: {user_id}")
-    print(players)
     save_players()
 
 def remove_player(user_id):
@@ -73,6 +64,9 @@ async def kill_player(
 
     game_role = guild.get_role(GAME_ROLE_ID)
     dead_role = guild.get_role(DEAD_ROLE_ID)
+
+    if member is None:
+        return
 
     if game_role is not None:
         await member.remove_roles(game_role)

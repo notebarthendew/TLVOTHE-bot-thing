@@ -24,7 +24,7 @@ bot = commands.Bot(command_prefix='?', intents=intents)
 
 from game.player import load_players
 from game.room_items import load_room_items
-from game.game_state import GAME, end_game, load_game_state
+from game.game_state import GAME, end_game, load_game_state, process_status_effects
 from cogs.commands import setup_commands as setup_slash_commands
 from cogs.prefix_commands import setup_commands as setup_prefix_commands
 from cogs.game_commands import setup_commands as setup_game_commands
@@ -103,27 +103,44 @@ async def rotate_status():
     )
 
 
-@tasks.loop(minutes=1)
+@tasks.loop(seconds=10)
 async def game_loop():
-    if not GAME["running"] or time.time() < GAME["end_time"]:
+    if GAME.get("guild_id") is not None:
+        status_guilds = [
+            guild
+            for guild in [bot.get_guild(GAME["guild_id"])]
+            if guild is not None
+        ]
+    else:
+        status_guilds = list(bot.guilds)
+
+    for guild in status_guilds:
+        await process_status_effects(guild)
+
+    if not GAME["running"]:
         return
 
     guild = bot.get_guild(GAME["guild_id"])
+    if guild is None:
+        return
+
+    if time.time() < GAME["end_time"]:
+        return
+
     if guild is not None:
         await end_game(guild, "good")
 
 @tasks.loop(minutes=5)
 async def murderer_passive_income():
-    """Give the murderer 10 coins every 5 minutes passively."""
     if not GAME["running"]:
         return
-    
+
     from game.player import players, save_players
-    
+
     for user_id, player in players.items():
         if player.get("role") == "murderer" and not player.get("dead", False):
             player["coins"] = player.get("coins", 0) + 10
-    
+
     save_players()
 
 @bot.event
@@ -152,7 +169,7 @@ async def on_ready():
 
     if not game_loop.is_running():
         game_loop.start()
-    
+
     if not murderer_passive_income.is_running():
         murderer_passive_income.start()
 
@@ -173,10 +190,6 @@ async def on_guild_join(guild):
         except discord.HTTPException as e:
             print(f"Failed to send join message: {e}")
 
-load_players()
-load_room_items()
-load_game_state()
-
 @bot.tree.error
 async def on_app_command_error(
     interaction: discord.Interaction,
@@ -194,4 +207,18 @@ async def on_app_command_error(
 
     print("-------------------------\n")
 
-bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+
+def main():
+    if not token:
+        raise RuntimeError(
+            "DISCORD_TOKEN is not set. Add it to your .env file or environment before running the bot."
+        )
+
+    load_players()
+    load_room_items()
+    load_game_state()
+    bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+
+
+if __name__ == "__main__":
+    main()

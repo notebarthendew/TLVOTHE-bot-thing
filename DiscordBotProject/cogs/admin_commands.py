@@ -491,23 +491,27 @@ def setup_commands(bot):
             )
 
             return
+
+        game_role = interaction.guild.get_role(GAME_ROLE_ID)
+        if game_role is None:
+            await interaction.response.send_message(
+                "The game role is not configured.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
         
         # Create player
         print("ADD COMMAND REACHED")
         create_player(user_id, nickname, role, spawn_room, emoji)
 
-        # Give game role
-        game_role = interaction.guild.get_role(
-            GAME_ROLE_ID
-        )
-
         await member.add_roles(game_role)
 
         await set_player_room(interaction.guild, member, spawn_room)
 
-        await interaction.response.send_message(
-            f"{member.mention} joined the game in room {spawn_room}.",
-            ephemeral=True
+        await interaction.edit_original_response(
+            content=f"{member.mention} joined the game in room {spawn_room}."
         )
 
     @bot.tree.command(
@@ -774,17 +778,23 @@ def setup_commands(bot):
 
             return
 
+        target_member = interaction.guild.get_member(int(target_id))
+        dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
+        game_role = interaction.guild.get_role(GAME_ROLE_ID)
+        if target_member is None or dead_role is None or game_role is None:
+            await interaction.response.send_message(
+                "The player or game roles could not be found.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
         players[target_id]["alive"] = False
         save_players()
 
-        dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
-        game_role = interaction.guild.get_role(GAME_ROLE_ID)
-
-        # Get the Discord member to update roles
-        target_member = interaction.guild.get_member(int(target_id))
-        if target_member:
-            await target_member.remove_roles(game_role)
-            await target_member.add_roles(dead_role)
+        await target_member.remove_roles(game_role)
+        await target_member.add_roles(dead_role)
 
         target_nickname = players[target_id]["nickname"]
         target_emoji = players[target_id].get("emoji", "")
@@ -793,9 +803,8 @@ def setup_commands(bot):
         current_room = players[target_id]["room"]
         room_channel = interaction.guild.get_channel(ROOMS[current_room]["channel_id"])
 
-        await interaction.response.send_message(
-            f"*{target_display} has been killed.*",
-            ephemeral=True
+        await interaction.edit_original_response(
+            content=f"*{target_display} has been killed.*"
         )
         await room_channel.send(
             f"*{target_display} has died.*"
@@ -894,28 +903,40 @@ def setup_commands(bot):
             )
             return
 
-        players[target_id]["alive"] = True
-        save_players()
+        target_member = interaction.guild.get_member(int(target_id))
+        if target_member is None:
+            await interaction.response.send_message(
+                "That player is not in this server.",
+                ephemeral=True
+            )
+            return
 
         dead_role = interaction.guild.get_role(DEAD_ROLE_ID)
         game_role = interaction.guild.get_role(GAME_ROLE_ID)
+        if dead_role is None or game_role is None:
+            await interaction.response.send_message(
+                "The game roles are not configured.",
+                ephemeral=True
+            )
+            return
 
-        target_member = interaction.guild.get_member(int(target_id))
-        if target_member:
-            await target_member.remove_roles(dead_role)
-            await target_member.add_roles(game_role)
-            
-            # Restore room visibility
-            player_room = players[target_id]["room"]
-            await set_player_room(interaction.guild, target_member, player_room)
+        await interaction.response.defer(ephemeral=True)
+
+        await target_member.remove_roles(dead_role)
+        await target_member.add_roles(game_role)
+
+        player_room = players[target_id]["room"]
+        await set_player_room(interaction.guild, target_member, player_room)
+
+        players[target_id]["alive"] = True
+        save_players()
 
         target_nickname = players[target_id]["nickname"]
         target_emoji = players[target_id].get("emoji", "")
         target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
 
-        await interaction.response.send_message(
-            f"Revived {target_display}.",
-            ephemeral=True
+        await interaction.edit_original_response(
+            content=f"Revived {target_display}."
         )
 
     @bot.tree.command(
@@ -957,16 +978,21 @@ def setup_commands(bot):
             )
             return
 
+        await interaction.response.defer(ephemeral=True)
+
         players[target_id]["room"] = room
         save_players()
+
+        target_member = interaction.guild.get_member(int(target_id))
+        if target_member is not None and players[target_id].get("alive", False):
+            await set_player_room(interaction.guild, target_member, room)
 
         target_nickname = players[target_id]["nickname"]
         target_emoji = players[target_id].get("emoji", "")
         target_display = f"{target_nickname} ({target_emoji})" if target_emoji else target_nickname
 
-        await interaction.response.send_message(
-            f"Teleported {target_display} to {room}.",
-            ephemeral=True
+        await interaction.edit_original_response(
+            content=f"Teleported {target_display} to {room}."
         )
 
     @bot.tree.command(
